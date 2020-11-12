@@ -1,0 +1,15 @@
+{
+  "name": "aesir-mining-program",
+  "version": "1.0.0",
+  "description": "Aesir Mining Program Manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "Marshall Belles (Mediocrates)",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "discord.js": "^12.4.1",
+    "eslint": "^7.13.0"
+  }
+}
