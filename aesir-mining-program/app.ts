@@ -5,7 +5,7 @@ client.once('ready', () => {
 	console.log('Ready!');
 });
 
-client.on('messageReactionAdd', (messageReaction, user) => {
+client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     if(user.bot)  return;
     const { message, emoji } = messageReaction;
     
@@ -15,7 +15,7 @@ client.on('messageReactionAdd', (messageReaction, user) => {
      }
 });
 
-client.on('message', message => {
+client.on('message', (message: any) => {
     var parts = message.content.split(" ");
     if (message.author == client.user) {
         return;
