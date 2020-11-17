@@ -14,17 +14,16 @@ client.once('ready', () => {
 });
 
 client.on('messageReactionAdd', (messageReaction:any, user:any) => {
-    if(user.bot)  return;
     const { message, emoji } = messageReaction;
-    
+    if(user.bot)  return;
     if (message.author == client.user) {
         if (message.channel.id == '776943538633965638') {
             if(emoji.name === "yes") {
-                messageReaction.message.guild.member(user).roles.set(['776945218729017354']).catch((err:any) => {console.error(err)});
+                message.guild.member(user).roles.set(['776945218729017354']).catch(console.error);
             }
             if(emoji.name === "no") {
-                messageReaction.message.guild.member(user).roles.set([]).catch((err:any) => {console.error(err)});
-                messageReaction.message.guild.member(user).kick().catch((err:any) => {console.error(err)});
+                message.guild.member(user).roles.set([]).catch(console.error);
+                message.guild.member(user).kick().catch(console.error);
              }
         }
     }
