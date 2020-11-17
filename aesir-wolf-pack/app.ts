@@ -58,19 +58,13 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     const { message, emoji } = messageReaction;
     
     if(emoji.name === "🐺") {
-        messageReaction.message.guild.member(user).roles.set(['776841167123120158']).then(() => {
-            messageReaction.message.channel.send(`${message.member.displayName} has joined the pack! \n Welcome to the <#776560170095607828>`).then((msg:any) => { msg.delete({ timeout: 600000 }) }).catch(console.error);
-        }).catch(console.error);
+        messageReaction.message.guild.member(user).roles.set(['776841167123120158']).catch(console.error);
     }
     if(emoji.name === "miner") {
-        messageReaction.message.guild.member(user).roles.set(['776840866492842004']).then(() => {
-            messageReaction.message.channel.send(`${message.member.displayName} is interested in our mining program. \n Please visit <#776280002181726210> for more details.`).then((msg:any) => { msg.delete({ timeout: 600000 }) }).catch(console.error);
-        }).catch(console.error);
+        messageReaction.message.guild.member(user).roles.set(['776840866492842004']).catch(console.error);
     }
     if(emoji.name === "🤝") {
-        messageReaction.message.guild.member(user).roles.set(['776841070419247104']).then(() => {
-            messageReaction.message.channel.send(`${message.member.displayName} has chosen diplomacy. \n Please visit <#776944674690302012>`).then((msg:any) => { msg.delete({ timeout: 600000 }) }).catch(console.error);
-        }).catch(console.error);
+        messageReaction.message.guild.member(user).roles.set(['776841070419247104']).catch(console.error);
     }
 });
 
