@@ -19,10 +19,10 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     
     if (message.author == client.user) {
         if (message.channel.id == '776943538633965638') {
-            if(emoji.name === "<:yes:776488521090465804>") {
+            if(emoji.name === "yes") {
                 messageReaction.message.guild.member(user).roles.set(['776945218729017354']).catch((err:any) => {console.error(err)});
             }
-            if(emoji.name === "<:no:776488521414344815>") {
+            if(emoji.name === "no") {
                 messageReaction.message.guild.member(user).roles.set([]).catch((err:any) => {console.error(err)});
                 messageReaction.message.guild.member(user).kick().catch((err:any) => {console.error(err)});
              }
