@@ -20,7 +20,7 @@ const random = ():number => { return Math.floor(Math.random() * slightlyOffensiv
 client.on('guildMemberAdd', (member: any) => {
     client.channels.fetch('776559380970995712')
         .then((channel:any) => {
-            channel.send(`Welcome ${member.displayName}, ${slightlyOffensiveNames[random()]} \n \n Thanks for checking out our humble Discord. \n \n If you are here to take advantage of our “Mining For Isk” program to earn over 100M in a week, then we hope your stay is a profitable one. \n \n If you are joining our corporation, be sure to review the corp rules page once your application is approved. \n \n And if you are here for diplomatic reasons, then welcome. \n \n Please select an option below to continue. \n \n 🤝 = Diplomacy \n <:miner:776567439701704714> = mining program \n 🐺 = join the wolf pack`)
+            channel.send(`Welcome ${member.displayName}, ${slightlyOffensiveNames[random()]} \n \n Thanks for checking out our humble Discord. \n \n If you are here to take advantage of our “Mining For Isk” program to earn over 100M ISK per week, then we hope your stay is a profitable one. \n \n If you are joining our corporation, be sure to review the corp rules page once your application is approved. \n \n And if you are here for diplomatic reasons, then welcome. \n \n Please select an option below to continue. \n \n 🤝 = Diplomacy \n <:miner:776567439701704714> = mining program \n 🐺 = join the wolf pack`)
             .then((msg:any) => {
                 msg.delete({ timeout: 600000 })
               })
@@ -58,14 +58,20 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     const { message, emoji } = messageReaction;
     
     if(emoji.name === "🐺") {
-        messageReaction.message.guild.member(user).roles.add('776841167123120158').catch((err:any) => {console.error(err)});
+        messageReaction.message.guild.member(user).roles.set(['776841167123120158']).then(() => {
+            messageReaction.message.channel.send(`${message.member.displayName} has joined the pack! \n Welcome to the <#776560170095607828>`).then((msg:any) => { msg.delete({ timeout: 600000 }) }).catch(console.error);
+        }).catch(console.error);
     }
     if(emoji.name === "miner") {
-        messageReaction.message.guild.member(user).roles.add('776840866492842004').catch((err:any) => {console.error(err)});
+        messageReaction.message.guild.member(user).roles.set(['776840866492842004']).then(() => {
+            messageReaction.message.channel.send(`${message.member.displayName} is interested in our mining program. \n Please visit <#776280002181726210> for more details.`).then((msg:any) => { msg.delete({ timeout: 600000 }) }).catch(console.error);
+        }).catch(console.error);
     }
     if(emoji.name === "🤝") {
-        messageReaction.message.guild.member(user).roles.add('776841070419247104').catch((err:any) => {console.error(err)});
-     }
+        messageReaction.message.guild.member(user).roles.set(['776841070419247104']).then(() => {
+            messageReaction.message.channel.send(`${message.member.displayName} has chosen diplomacy. \n Please visit <#776944674690302012>`).then((msg:any) => { msg.delete({ timeout: 600000 }) }).catch(console.error);
+        }).catch(console.error);
+    }
 });
 
 client.login('Nzc2NTI5NDM5MTYwNzk1MTY1.X62NZQ.s90oWkajTJo2PLRk8HwksK7JaK8');
