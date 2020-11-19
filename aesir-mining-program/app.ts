@@ -27,9 +27,9 @@ client.once('ready', () => {
             ::  Replace your Venture if it is destroyed.
             ::  Purchase the ore you mine. 
             
-            Feel free to stop by [exterior-chat] to chat, howl at the moon and hear the latest rumors.
+            Feel free to stop by <#778377903129624616> to chat, howl at the moon and hear the latest rumors.
             
-            When your ready to sell your ore head to #the-town-market. Be sure to check the pinned post to see the rates for ore. 
+            When your ready to sell your ore head to <#776280849288921129>. Be sure to check the pinned post to see the rates for ore. 
             
             Before moving forward, you must adjust your discord tag to include the type of Venture you fly.  (VT, V1, V2, or V3)
             
