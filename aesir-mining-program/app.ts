@@ -8,7 +8,32 @@ client.once('ready', () => {
     console.log('Ready!');
     client.channels.fetch('776943538633965638').then((channel:any) => {
         channel.bulkDelete(100).then(() => {
-            channel.send(`If you’re a Omega Clone looking to earn some serious isk, Aesir has you covered! \n \n We will provide you a safe place to mine valuable ores, and pay you well for what you mine. \n This means no more cheap ore, no more constant hauling to market, no more worry over pirates. \n \n Depending on the size of your Venture, each cargo-hold-full could earn you well over 2.0M ISK! \n How much ISK you can make in 2 weeks is up to you! \n \n When you accept this program, Aesir will:\n ::  Provide access to System Level 6 ores. \n ::  Protect you from pirates. \n ::  Replace your Venture if it is destroyed.\n ::  Purchase the ore that you mine \n \n Feel free to stop by <#776560170095607828> to chat, howl at the moon, and hear the latest rumors.\n When your ready to sell your ore head to <#776280849288921129> to see our rates for ore. \n \n Before moving forward, please adjust your discord tag to include the type of Venture you fly.  (VT, V1, V2, or V3) \n \n React to this message with: <:yes:776488521090465804> if you agree with the <#776943478416080978> and accept the offer. \n`);
+            channel.send(`
+            If you’re a Omega Clone looking to earn some serious isk, Aesir has you covered. We will provide you a safe place to mine valuable ores, and pay you well for what you mine. 
+
+            :: No more Cheap Ore
+            :: No more time consuming jumps to market. 
+            :: No more market fees eating your profit. 
+            :: No more worry about pirates.
+            
+            Depending on the size of your Venture, each cargo-hold-full could earn you over 2M isk depending on the size of your Venture. 
+            
+            How many holds you can fill in 2 weeks is up to you!
+            
+            Over the two weeks that you’ll have access to our sector Aesir will:
+            
+            ::  Provide access to our T6 ores. 
+            ::  Protect you from pirates. 
+            ::  Replace your Venture if it is destroyed.
+            ::  Purchase the ore you mine. 
+            
+            Feel free to stop by [exterior-chat] to chat, howl at the moon and hear the latest rumors.
+            
+            When your ready to sell your ore head to #the-town-market. Be sure to check the pinned post to see the rates for ore. 
+            
+            Before moving forward, you must adjust your discord tag to include the type of Venture you fly.  (VT, V1, V2, or V3)
+            
+            Example: [V3]Ethos Ari`);
         }).catch(console.error);
     }).catch(console.error);
 });
@@ -58,8 +83,7 @@ client.on('message', (message: any) => {
                             const getHed = hedValue();
                             Promise.all([getSpod, getDO, getPyro, getGN, getHem, getHed]).then((values:number[]) => {
                                 console.log(values);
-                                message.channel.send(`
-                                Post here what you are ready to sell and what you calculate to be the total cost. Please only request to sell once you have at least 50,000 cubic meters of ore. \n \`\`\`  Spodumain: ${values[0]} ISK / Unit \n Dark Ochre: ${values[1]} ISK / Unit \n  Pyroxeres: ${values[2]} ISK / Unit \n     Gneiss: ${values[3]} ISK / Unit \n Hemorphite: ${values[4]} ISK / Unit \n Hedbergite: ${values[5]} ISK / Unit \`\`\` \n`);
+                                message.channel.send(`Post here what you are ready to sell and what you calculate to be the total cost. We will purchase a minimum of 50,000 m3 of ore at a time. \n \n The prices below will be updated weekly. \n \n Bring a friend! \n If your friend comes and joins the program, we will pay you 2.5M isk when they sell us their first batch of 50,000 m3. \n *NOT applicable for alts* \n \n \`\`\`  Spodumain: ${values[0]} ISK / Unit \n Dark Ochre: ${values[1]} ISK / Unit \n  Pyroxeres: ${values[2]} ISK / Unit \n     Gneiss: ${values[3]} ISK / Unit \n Hemorphite: ${values[4]} ISK / Unit \n Hedbergite: ${values[5]} ISK / Unit \`\`\` \n`);
                             });
                         }).catch(console.error);
                     }).catch(console.error)
