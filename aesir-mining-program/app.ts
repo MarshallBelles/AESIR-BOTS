@@ -83,7 +83,7 @@ client.on('message', (message: any) => {
                             const getHed = hedValue();
                             Promise.all([getSpod, getDO, getPyro, getGN, getHem, getHed]).then((values:number[]) => {
                                 console.log(values);
-                                message.channel.send(`Post here what you are ready to sell and what you calculate to be the total cost. We will purchase a minimum of 50,000 m3 of ore at a time. \n \n The prices below will be updated weekly. \n \n Bring a friend! \n If your friend comes and joins the program, we will pay you 2.5M isk when they sell us their first batch of 50,000 m3. \n *NOT applicable for alts* \n \n \`\`\`  Spodumain: ${values[0]} ISK / Unit \n Dark Ochre: ${values[1]} ISK / Unit \n  Pyroxeres: ${values[2]} ISK / Unit \n     Gneiss: ${values[3]} ISK / Unit \n Hemorphite: ${values[4]} ISK / Unit \n Hedbergite: ${values[5]} ISK / Unit \`\`\` \n`);
+                                message.channel.send(`Post here what you are ready to sell and what you calculate to be the total cost. We will purchase a minimum of 50,000 m3 of ore at a time. \n \n The prices below will be updated weekly. \n \n Bring a friend! \n If your friend comes and joins the program, we will pay you 2.5M isk when they sell us their first batch of 50,000 m3. \n *NOT applicable for alts* \n \n \`\`\`  Spodumain: ${values[0]} ISK / m3 \n Dark Ochre: ${values[1]} ISK / m3 \n  Pyroxeres: ${values[2]} ISK / m3 \n     Gneiss: ${values[3]} ISK / m3 \n Hemorphite: ${values[4]} ISK / m3 \n Hedbergite: ${values[5]} ISK / m3 \`\`\` \n`);
                             });
                         }).catch(console.error);
                     }).catch(console.error)
@@ -101,11 +101,11 @@ let spodumainValue = (): Promise<number> => {
         axios.get('https://api.eve-echoes-market.com/market-stats/51009000000').then((res:any) => {
             var totalBuyHigh = 0;
             for(var i = 0; i < res.data.length; i++) {
-                totalBuyHigh += res.data[i].buy;
+                totalBuyHigh += res.data[i].highest_buy;
             }
             oreAvg = totalBuyHigh / res.data.length;
             console.log(oreAvg);
-            resolve(Math.floor(oreAvg * 0.75));
+            resolve(Math.floor((oreAvg * 0.8)/3.2));
         }).catch(console.error);
     });
 }
@@ -116,10 +116,10 @@ let doValue = (): Promise<number> => {
         axios.get('https://api.eve-echoes-market.com/market-stats/51010000000').then((res:any) => {
             var totalBuyHigh = 0;
             for(var i = 0; i < res.data.length; i++) {
-                totalBuyHigh += res.data[i].buy;
+                totalBuyHigh += res.data[i].highest_buy;
             }
             oreAvg = totalBuyHigh / res.data.length;
-            resolve(Math.floor(oreAvg * 0.75));
+            resolve(Math.floor((oreAvg * 0.8)/1.8));
         }).catch(console.error);
     });
 }
@@ -130,10 +130,10 @@ let pyroValue = (): Promise<number> => {
         axios.get('https://api.eve-echoes-market.com/market-stats/51002000000').then((res:any) => {
             var totalBuyHigh = 0;
             for(var i = 0; i < res.data.length; i++) {
-                totalBuyHigh += res.data[i].buy;
+                totalBuyHigh += res.data[i].highest_buy;
             }
             oreAvg = totalBuyHigh / res.data.length;
-            resolve(Math.floor(oreAvg * 0.75));
+            resolve(Math.floor((oreAvg * 0.8)/1.5));
         }).catch(console.error);
     });
 }
@@ -144,10 +144,10 @@ let gneissValue = (): Promise<number> => {
         axios.get('https://api.eve-echoes-market.com/market-stats/51011000000').then((res:any) => {
             var totalBuyHigh = 0;
             for(var i = 0; i < res.data.length; i++) {
-                totalBuyHigh += res.data[i].buy;
+                totalBuyHigh += res.data[i].highest_buy;
             }
             oreAvg = totalBuyHigh / res.data.length;
-            resolve(Math.floor(oreAvg * 0.75));
+            resolve(Math.floor((oreAvg * 0.8)/2));
         }).catch(console.error);
     });
 }
@@ -158,10 +158,10 @@ let hemValue = (): Promise<number> => {
         axios.get('https://api.eve-echoes-market.com/market-stats/51007000000').then((res:any) => {
             var totalBuyHigh = 0;
             for(var i = 0; i < res.data.length; i++) {
-                totalBuyHigh += res.data[i].buy;
+                totalBuyHigh += res.data[i].highest_buy;
             }
             oreAvg = totalBuyHigh / res.data.length;
-            resolve(Math.floor(oreAvg * 0.75));
+            resolve(Math.floor((oreAvg * 0.8)/3));
         }).catch(console.error);
     });
 }
@@ -172,10 +172,10 @@ let hedValue = (): Promise<number> => {
         axios.get('https://api.eve-echoes-market.com/market-stats/51008000000').then((res:any) => {
             var totalBuyHigh = 0;
             for(var i = 0; i < res.data.length; i++) {
-                totalBuyHigh += res.data[i].buy;
+                totalBuyHigh += res.data[i].highest_buy;
             }
             oreAvg = totalBuyHigh / res.data.length;
-            resolve(Math.floor(oreAvg * 0.75));
+            resolve(Math.floor((oreAvg * 0.8)/3));
         }).catch(console.error);
     });
 }
