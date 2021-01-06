@@ -42,7 +42,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     const { message, emoji } = messageReaction;
     if(user.bot)  return;
     if (message.author == client.user) {
-        if (message.channel.id == '776943538633965638') {
+        if (message.channel.id === '776943538633965638') {
             if(emoji.name === "yes") {
                 message.guild.member(user).roles.set(['776945218729017354']).catch(console.error);
             }
