@@ -40,46 +40,19 @@ let confMaster: ConfigurationMaster;
 
 client.once('ready', () => {
     console.log('Ready!');
-    // grab configuration from FireBase
+    // grab configuration from Firestore
     admin.firestore().doc('configuration/industry-bot').onSnapshot((conf) => {
         console.log('obtained new config');
         if (!conf.data()) return;
         confMaster = <ConfigurationMaster><any>conf.data();
-        client.channels.fetch(confMaster.main_channel).then((channel:any) => {
+        client.channels.fetch(confMaster.the_woods_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
-                channel.send(`Example commands: \`\`\`H | Help - Expanded help menu \nSpodumain 85000.3 m3 Misaba - Claim spodumain ore contribution for credit at Misaba \nDebris 200 Clarelam - Claim ship debris contribution for credit at Clarelam \nModules 20 mk5 Misaba - Claim module contribution credit at Misaba \nISK 20,000,000 - Claim 20M isk donation to corp wallet\nB | Balance - Display your industry system credit balance \nOrders Queue - view current order queue \nInsurance - provides instructions \`\`\``);
+                channel.send(`Thanks for checking out our humble Discord. \n \n If you are joining our corporation, be sure to review the corp rules page once your application is approved. \n \n if you are here for diplomatic reasons, then welcome. \n \n Please select an option below to continue. \n \n 🤝 = Diplomacy \n 🐺 = join the wolf pack`).then((msg:any) => {
+                    msg.react('🤝').then(() => msg.react('🐺'));
+                })
             }).catch(console.error);
         }).catch(console.error);
     });
-});
-const random = ():number => { return Math.floor(Math.random() * slightlyOffensiveNames.length) };
-
-client.on('guildMemberAdd', (member: any) => {
-    client.channels.fetch('776559380970995712')
-        .then((channel:any) => {
-            channel.send(`Welcome <@${member.id}>, ${slightlyOffensiveNames[random()]} \n \n Thanks for checking out our humble Discord. \n \n If you are joining our corporation, be sure to review the corp rules page once your application is approved. \n \n if you are here for diplomatic reasons, then welcome. \n \n Please select an option below to continue. \n \n 🤝 = Diplomacy \n 🐺 = join the wolf pack`)
-            .then((msg:any) => {
-                client.channels.fetch('776943538633965638').then((channel:any) => {
-                    /* channel.bulkDelete(100).then(() => {
-                        channel.send(`If you’re a Omega Clone looking to earn some serious isk, Aesir has you covered! \n \n We will provide you a safe place to mine valuable ores, and pay you well for what you mine. \n This means no more cheap ore, no more constant hauling to market, no more worry over pirates. \n \n Depending on the size of your Venture, each cargo-hold-full could earn you well over 2.0M ISK! \n How much ISK you can make in 2 weeks is up to you! \n \n When you accept this program, Aesir will:\n ::  Provide access to System Level 6 ores. \n ::  Protect you from pirates. \n ::  Replace your Venture if it is destroyed.\n ::  Purchase the ore that you mine \n \n Feel free to stop by <#776560170095607828> to chat, howl at the moon, and hear the latest rumors.\n When your ready to sell your ore head to <#776280849288921129> to see our rates for ore. \n \n Before moving forward, please adjust your discord tag to include the type of Venture you fly.  (VT, V1, V2, or V3) \n \n React to this message with: <:yes:776488521090465804> if you agree with the <#776943478416080978> and accept the offer. \n`);
-                    }).catch(console.error); */
-                }).catch(console.error);
-                msg.delete({ timeout: 600000 }).catch(console.error);
-              })
-        })
-        .catch(console.error);
-});
-
-client.on('message', (message: any) => {
-    var parts = message.content.split(" ");
-    if (message.author == client.user) {
-        if (parts[0] == 'Welcome') {
-            // This is one of our welcome messages above
-            message.react('🤝')
-            .then(() => message.react('<:miner:776567439701704714>'))
-            .then(() => message.react('🐺'));
-        }
-    }
 });
 
 client.on('message', (message: any) => {
@@ -94,17 +67,26 @@ client.on('message', (message: any) => {
 });
 
 client.on('messageReactionAdd', (messageReaction:any, user:any) => {
-    if(user.bot)  return;
-    const { message, emoji } = messageReaction;
-    
-    if(emoji.name === "🐺") {
-        message.guild.member(user).roles.set(['776841167123120158']).catch(console.error);
-    }
-    if(emoji.name === "miner") {
-        message.guild.member(user).roles.set(['776840866492842004']).catch(console.error);
-    }
-    if(emoji.name === "🤝") {
-        message.guild.member(user).roles.set(['776841070419247104']).catch(console.error);
+    if (user.bot) return;
+    if (messageReaction.message.channel.id == confMaster.the_woods_channel) {
+        const { message, emoji } = messageReaction;
+        if(emoji.name === "🐺") {
+            message.guild.member(user).roles.add('776841167123120158').catch(console.error);
+        }
+        if(emoji.name === "miner") {
+            message.guild.member(user).roles.add('776840866492842004').catch(console.error);
+        }
+        if(emoji.name === "🤝") {
+            message.guild.member(user).roles.add('776841070419247104').catch(console.error);
+        }
+        const userReactions = messageReaction.message.reactions.cache.filter((reaction:any) => reaction.users.cache.has(user.id));
+        try {
+            for (const reaction of userReactions.values()) {
+                reaction.users.remove(user.id);
+            }
+        } catch (error) {
+            console.error('Failed to remove reactions.');
+        }
     }
 });
 
