@@ -25,6 +25,7 @@ interface ConfigurationMaster {
     main_channel: string,
     admin_channel: string,
     tech_level_channel: string,
+    the_woods_channel: string,
     skills_channel: string,
     hangars: string[],
     ore_holds_per_credit: number,
@@ -35,20 +36,22 @@ interface ConfigurationMaster {
     T9T10: number
 }
 
+let confMaster: ConfigurationMaster;
+
 client.once('ready', () => {
-	console.log('Ready!');
+    console.log('Ready!');
+    // grab configuration from FireBase
+    admin.firestore().doc('configuration/industry-bot').onSnapshot((conf) => {
+        console.log('obtained new config');
+        if (!conf.data()) return;
+        confMaster = <ConfigurationMaster><any>conf.data();
+        client.channels.fetch(confMaster.main_channel).then((channel:any) => {
+            channel.bulkDelete(100).then(() => {
+                channel.send(`Example commands: \`\`\`H | Help - Expanded help menu \nSpodumain 85000.3 m3 Misaba - Claim spodumain ore contribution for credit at Misaba \nDebris 200 Clarelam - Claim ship debris contribution for credit at Clarelam \nModules 20 mk5 Misaba - Claim module contribution credit at Misaba \nISK 20,000,000 - Claim 20M isk donation to corp wallet\nB | Balance - Display your industry system credit balance \nOrders Queue - view current order queue \nInsurance - provides instructions \`\`\``);
+            }).catch(console.error);
+        }).catch(console.error);
+    });
 });
-
-var slightlyOffensiveNames = [
-    'you magnificent potato!',
-    'you sly dog!',
-    'you phat mamma jamma!',
-    'you elvis impersonator you!',
-    'you strut like a rooster!',
-    'bring on the pain!',
-    'took you long enough!'
-]
-
 const random = ():number => { return Math.floor(Math.random() * slightlyOffensiveNames.length) };
 
 client.on('guildMemberAdd', (member: any) => {

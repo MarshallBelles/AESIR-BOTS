@@ -23,6 +23,7 @@ interface ConfigurationMaster {
     main_channel: string,
     admin_channel: string,
     tech_level_channel: string,
+    the_woods_channel: string,
     skills_channel: string,
     hangars: string[],
     ore_holds_per_credit: number,
