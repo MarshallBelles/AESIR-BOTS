@@ -73,9 +73,6 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
         if(emoji.name === "🐺") {
             message.guild.member(user).roles.add('776841167123120158').catch(console.error);
         }
-        if(emoji.name === "miner") {
-            message.guild.member(user).roles.add('776840866492842004').catch(console.error);
-        }
         if(emoji.name === "🤝") {
             message.guild.member(user).roles.add('776841070419247104').catch(console.error);
         }
