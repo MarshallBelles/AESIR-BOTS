@@ -25,6 +25,7 @@ interface ConfigurationMaster {
     main_channel: string,
     admin_channel: string,
     tech_level_channel: string,
+    skills_channel: string,
     hangars: string[],
     ore_holds_per_credit: number,
     dmr_per_credit: number,
@@ -33,7 +34,6 @@ interface ConfigurationMaster {
     T7T8: number,
     T9T10: number
 }
-
 
 client.once('ready', () => {
 	console.log('Ready!');
