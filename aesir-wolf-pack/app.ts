@@ -74,8 +74,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     if (message.channel.id == confMaster.the_woods_channel) {
         if(emoji.name === "🐺") {
             message.guild.member(user).roles.add('776841167123120158').catch(console.error);
-            message.reactions.resolve("🐺").users.remove(user.id);
-            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })});
+            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })}).then(() => {message.reactions.resolve("🐺").users.remove(user.id);});
             client.channels.fetch(confMaster.hr_channel).then((channel:any) => {
                 channel.send(`<@&796749710681178132>, <@${user.id}> has joined the server and is interested in joining Aesir. React YES to accept, or NO to reject and boot from the server.`).then((msg:any) => {
                     msg.react('<:yes:776488521090465804>')
@@ -87,7 +86,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
         if(emoji.name === "🤝") {
             message.guild.member(user).roles.add('776841070419247104').catch(console.error);
             message.reactions.resolve("🤝").users.remove(user.id);
-            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })});
+            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })}).then(() => {message.reactions.resolve("🤝").users.remove(user.id);});
         }
     }
     if (message.channel.id == confMaster.hr_channel) {
