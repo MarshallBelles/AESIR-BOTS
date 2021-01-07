@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+import { Emoji } from "discord.js";
 import * as admin from "firebase-admin";
 
 var serviceAccount = {
@@ -24,6 +25,7 @@ admin.initializeApp({
 interface ConfigurationMaster {
     main_channel: string,
     admin_channel: string,
+    hr_channel: string,
     tech_level_channel: string,
     the_woods_channel: string,
     skills_channel: string,
@@ -67,16 +69,44 @@ client.on('message', (message: any) => {
 });
 
 client.on('messageReactionAdd', (messageReaction:any, user:any) => {
+    const { message, emoji } = messageReaction;
     if (user.bot) return;
-    if (messageReaction.message.channel.id == confMaster.the_woods_channel) {
-        const { message, emoji } = messageReaction;
+    if (message.channel.id == confMaster.the_woods_channel) {
         if(emoji.name === "🐺") {
             message.guild.member(user).roles.add('776841167123120158').catch(console.error);
-            messageReaction.message.reactions.resolve("🐺").users.remove(user.id);
+            message.reactions.resolve("🐺").users.remove(user.id);
+            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })});
+            client.channels.fetch(confMaster.hr_channel).then((channel:any) => {
+                channel.send(`<@&796749710681178132>, <@${user.id}> has joined the server and is interested in joining Aesir. React YES to accept, or NO to reject and boot from the server.`).then((msg:any) => {
+                    msg.react('<:yes:776488521090465804>')
+                    .then(() => msg.react('<:no:776488521414344815>'));
+                })
+            }).catch(console.error);
+
         }
         if(emoji.name === "🤝") {
             message.guild.member(user).roles.add('776841070419247104').catch(console.error);
-            messageReaction.message.reactions.resolve("🤝").users.remove(user.id);
+            message.reactions.resolve("🤝").users.remove(user.id);
+            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })});
+        }
+    }
+    if (message.channel.id == confMaster.hr_channel) {
+        var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
+        if (parts[0] === "<@&796749710681178132>") {
+            const refMem = parts[1].replace(/</g, '').replace(/@/g, '').replace(/&/g, '').replace(/>/g, '').replace(/!/g, '');
+            if (emoji.name === "yes") {
+                // allow member in
+                message.guild.member(refMem).roles.remove('776841167123120158').catch(console.error);
+                message.guild.member(refMem).roles.add('776243945285746689').catch(console.error);
+                message.channel.send(`<@${user.id}> has accepted <@${refMem}> into the corp!`);
+                message.delete();
+            }
+            if (emoji.name === "no") {
+                // kick member
+                message.guild.member(refMem).kick();
+                message.channel.send(`<@${user.id}> has kicked <@${refMem}>!`);
+                message.delete();
+            }
         }
     }
 });

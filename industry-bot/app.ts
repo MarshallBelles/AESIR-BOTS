@@ -22,6 +22,7 @@ admin.initializeApp({
 interface ConfigurationMaster {
     main_channel: string,
     admin_channel: string,
+    hr_channel: string,
     tech_level_channel: string,
     the_woods_channel: string,
     skills_channel: string,
@@ -166,9 +167,7 @@ client.on('message', (message: any) => {
                 switch (parts[1]) {
                     case "new":
                         if (parts[2] == "month") {
-                            // For each member, check donations over the past week 
-                            // if officer, apply 2 credits.
-                            // prune system tables
+                            // For each member, check donations over the past month
 
                             message.channel.send('Not implemented yet');
                         }
