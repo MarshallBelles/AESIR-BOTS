@@ -54,6 +54,16 @@ client.once('ready', () => {
                 })
             }).catch(console.error);
         }).catch(console.error);
+        client.channels.fetch(confMaster.hr_channel).then((channel:any) => {
+            channel.bulkDelete(100).then(() => {
+                channel.guild.roles.resolve('776841167123120158').members.forEach((mem:any) => {
+                    channel.send(`<@&796749710681178132>, <@${mem.id}> has joined the server and is interested in joining Aesir. React YES to accept, or NO to reject and boot from the server.`).then((msg:any) => {
+                        msg.react('<:yes:776488521090465804>')
+                        .then(() => msg.react('<:no:776488521414344815>'));
+                    })
+                });
+            }).catch(console.error);
+        }).catch(console.error);
     });
 });
 
@@ -79,7 +89,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
                 channel.send(`<@&796749710681178132>, <@${user.id}> has joined the server and is interested in joining Aesir. React YES to accept, or NO to reject and boot from the server.`).then((msg:any) => {
                     msg.react('<:yes:776488521090465804>')
                     .then(() => msg.react('<:no:776488521414344815>'));
-                })
+                });
             }).catch(console.error);
 
         }
