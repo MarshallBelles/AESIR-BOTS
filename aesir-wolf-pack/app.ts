@@ -72,23 +72,14 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
         const { message, emoji } = messageReaction;
         if(emoji.name === "🐺") {
             message.guild.member(user).roles.add('776841167123120158').catch(console.error);
+            messageReaction.message.reactions.resolve("🐺").users.remove(user.id);
         }
         if(emoji.name === "🤝") {
             message.guild.member(user).roles.add('776841070419247104').catch(console.error);
+            messageReaction.message.reactions.resolve("🤝").users.remove(user.id);
         }
-        removeUserReactions(messageReaction, user);
     }
 });
 
- const removeUserReactions = async (messageReaction:any, user:any) => {
-    const userReactions = messageReaction.message.reactions.cache.filter((reaction:any) => reaction.users.cache.has(user.id));
-    try {
-        for (const reaction of userReactions.values()) {
-            await reaction.users.remove(user.id);
-        }
-    } catch (error) {
-        console.error('Failed to remove reactions.');
-    }
- }
 
 client.login('Nzc2NTI5NDM5MTYwNzk1MTY1.X62NZQ.s90oWkajTJo2PLRk8HwksK7JaK8');
