@@ -105,9 +105,12 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
             const refMem = parts[1].replace(/</g, '').replace(/@/g, '').replace(/&/g, '').replace(/>/g, '').replace(/!/g, '');
             if (emoji.name === "yes") {
                 // allow member in
-                message.guild.member(refMem).roles.remove('776841167123120158').catch(console.error);
-                message.guild.member(refMem).roles.add('776243945285746689').catch(console.error);
-                message.channel.send(`<@${user.id}> has accepted <@${refMem}> into the corp!`);
+                if (message.guild.member(refMem)) {
+                    message.guild.member(refMem).roles.set(['776243945285746689']).catch(console.error);
+                    message.channel.send(`<@${user.id}> has accepted <@${refMem}> into the corp!`);
+                } else {
+                    message.channel.send('That user has left the server.').then((msg:any) => {msg.delete({timeout:50000})});
+                }
                 message.delete();
             }
             if (emoji.name === "no") {
