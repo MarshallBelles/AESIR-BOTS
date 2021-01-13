@@ -390,7 +390,7 @@ client.on('message', (message: any) => {
                     if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
                     {multiplier = 0.33}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.debris, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2]);
+                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.debris, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
