@@ -444,7 +444,7 @@ client.on('message', (message: any) => {
                     if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {multiplier = 0.5} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.1} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
                     saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
@@ -458,7 +458,7 @@ client.on('message', (message: any) => {
                     if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 0.2} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.1} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
                     saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
@@ -472,7 +472,7 @@ client.on('message', (message: any) => {
                     if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {multiplier = 20} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 13} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 6} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 3} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 3}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
                     saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
@@ -486,7 +486,7 @@ client.on('message', (message: any) => {
                     if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 30} else
                     if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 15} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 6} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 6}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} Faction Debris! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
                     saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, "Faction Debris", parts[2], parts[1]);
                 } else {
