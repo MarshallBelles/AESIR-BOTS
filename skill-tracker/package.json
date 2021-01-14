@@ -1,14 +1,14 @@
 {
-  "name": "industry-bot",
+  "name": "skill-bot",
   "version": "1.0.0",
-  "description": "Aesir Industry Bot",
+  "description": "Aesir Skill Tracker",
   "main": "index.js",
   "scripts": {
     "tsc": "tsc",
     "dev": "ts-node-dev --respawn --transpileOnly ./app/app.ts",
     "prod": "tsc && node ./build/app.js"
   },
-  "author": "Marshall Belles (Mediocrates)",
+  "author": "Marshall Belles (Mediocrates), GalaxyMule",
   "license": "UNLICENSED",
   "dependencies": {
     "@types/node": "^14.14.7",
