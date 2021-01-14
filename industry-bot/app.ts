@@ -22,7 +22,9 @@ admin.initializeApp({
 interface ConfigurationMaster {
     main_channel: string,
     admin_channel: string,
+    hr_channel: string,
     tech_level_channel: string,
+    the_woods_channel: string,
     skills_channel: string,
     hangars: string[],
     ore_holds_per_credit: number,
@@ -165,9 +167,7 @@ client.on('message', (message: any) => {
                 switch (parts[1]) {
                     case "new":
                         if (parts[2] == "month") {
-                            // For each member, check donations over the past week 
-                            // if officer, apply 2 credits.
-                            // prune system tables
+                            // For each member, check donations over the past month
 
                             message.channel.send('Not implemented yet');
                         }
@@ -386,8 +386,11 @@ client.on('message', (message: any) => {
             case "debris":
                 if (!parts[1]) {message.delete({ timeout: 300000 });return;}
                 if (confMaster.hangars.includes(parts[2])) {
+                    let multiplier = 1.0;
+                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
+                    {multiplier = 0.33}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * 0.15), message.member.id, donationType.debris, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2]);
+                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.debris, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
@@ -398,20 +401,24 @@ client.on('message', (message: any) => {
                 switch (parts[2]) {
                     case "mk3":
                         if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                        {multiplier = 0.1}
+                        {multiplier = 0.0}
                     break;
                     case "mk5":
                         if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
                         if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
+                        if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.66} else
                         {multiplier = 0.1}
                     break;
                     case "mk7":
                         if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
+                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 1.33} else
                         if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {} else
                         {multiplier = 0.2}
                     break;
                     case "mk9":
+                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 1.66} else
+                        if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 1.33} else
+                        {}
                     break;
                     case "c":
                     break;
@@ -425,7 +432,7 @@ client.on('message', (message: any) => {
                     }
                     if (confMaster.hangars.includes(parts[3])) {
                         message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[2]} ${parts[0]}! \n Please place the contribution in ${parts[3].charAt(0).toUpperCase() + parts[3].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                        saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.module, (parts[2] + ' ' + parts[0]), parts[3]);
+                        saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.module, (parts[2] + ' ' + parts[0]), parts[3], parts[1]);
                     } else {
                         message.channel.send(` Please try again. \n Proper Usage: \`\`\`\n Modules [amount] [type] [location] \`\`\`\n Valid Types: mk5, mk7, mk9, C, story, faction \n Valid locations: ${confMaster.hangars}`);
                 }
@@ -433,8 +440,13 @@ client.on('message', (message: any) => {
             case "rigs":
                 if (!parts[1]) {message.delete({ timeout: 300000 });return;}
                 if (confMaster.hangars.includes(parts[2])) {
+                    let multiplier = 0.2;
+                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {multiplier = 0.5} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.1} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * 2), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2]);
+                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
@@ -442,8 +454,13 @@ client.on('message', (message: any) => {
             case "blueprints":
                 if (!parts[1]) {message.delete({ timeout: 300000 });return;}
                 if (confMaster.hangars.includes(parts[2])) {
+                    let multiplier = 0.5;
+                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 0.2} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.1} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * 3), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2]);
+                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
@@ -451,8 +468,13 @@ client.on('message', (message: any) => {
             case "datacores":
                 if (!parts[1]) {message.delete({ timeout: 300000 });return;}
                 if (confMaster.hangars.includes(parts[2])) {
+                    let multiplier = 1;
+                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {multiplier = 20} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 13} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 6} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 3}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * 4), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2]);
+                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
                 } else {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
@@ -460,8 +482,13 @@ client.on('message', (message: any) => {
             case "faction":
                 if (!parts[1]) {message.delete({ timeout: 300000 });return;}
                 if (confMaster.hangars.includes(parts[2])) {
+                    let multiplier = 1;
+                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 30} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 15} else
+                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 6}
                     message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} Faction Debris! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * 2), message.member.id, donationType.rig, "Faction Debris", parts[2]);
+                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, "Faction Debris", parts[2], parts[1]);
                 } else {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
@@ -490,14 +517,18 @@ client.on('message', (message: any) => {
     }
 });
 
-const saveContribution = (amt:any, member:string, type:donationType, name?:string, location?:string) => {
-    const claim:Claim = <Claim>{amount:parseFloat(amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now()};
+const saveContribution = (credit_amt:any, member:string, type:donationType, name?:string, location?:string, amount?:any) => {
+    const claim:Claim = <Claim>{amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now()};
     const id = admin.firestore().collection('data/industry-bot/claims').doc().id;
     admin.firestore().doc(`data/industry-bot/claims/${id}`).set(claim).then(() => {
         client.channels.fetch(confMaster.admin_channel).then((channel:any) => {
             const displayData:any = {};
             displayData.type = claim.name;
-            displayData.amount = claim.amount;
+            if (amount) {
+                displayData.amount = amount;
+            } else {
+                displayData.amount = claim.amount;
+            }
             displayData.location = claim.location;
             channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
                 msg.react('<:yes:776488521090465804>')

@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+import { Emoji } from "discord.js";
 import * as admin from "firebase-admin";
 
 var serviceAccount = {
@@ -24,7 +25,9 @@ admin.initializeApp({
 interface ConfigurationMaster {
     main_channel: string,
     admin_channel: string,
+    hr_channel: string,
     tech_level_channel: string,
+    the_woods_channel: string,
     skills_channel: string,
     hangars: string[],
     ore_holds_per_credit: number,
@@ -35,48 +38,33 @@ interface ConfigurationMaster {
     T9T10: number
 }
 
+let confMaster: ConfigurationMaster;
+
 client.once('ready', () => {
-	console.log('Ready!');
-});
-
-var slightlyOffensiveNames = [
-    'you magnificent potato!',
-    'you sly dog!',
-    'you phat mamma jamma!',
-    'you elvis impersonator you!',
-    'you strut like a rooster!',
-    'bring on the pain!',
-    'took you long enough!'
-]
-
-const random = ():number => { return Math.floor(Math.random() * slightlyOffensiveNames.length) };
-
-client.on('guildMemberAdd', (member: any) => {
-    client.channels.fetch('776559380970995712')
-        .then((channel:any) => {
-            channel.send(`Welcome <@${member.id}>, ${slightlyOffensiveNames[random()]} \n \n Thanks for checking out our humble Discord. \n \n If you are joining our corporation, be sure to review the corp rules page once your application is approved. \n \n if you are here for diplomatic reasons, then welcome. \n \n Please select an option below to continue. \n \n 🤝 = Diplomacy \n 🐺 = join the wolf pack`)
-            .then((msg:any) => {
-                client.channels.fetch('776943538633965638').then((channel:any) => {
-                    /* channel.bulkDelete(100).then(() => {
-                        channel.send(`If you’re a Omega Clone looking to earn some serious isk, Aesir has you covered! \n \n We will provide you a safe place to mine valuable ores, and pay you well for what you mine. \n This means no more cheap ore, no more constant hauling to market, no more worry over pirates. \n \n Depending on the size of your Venture, each cargo-hold-full could earn you well over 2.0M ISK! \n How much ISK you can make in 2 weeks is up to you! \n \n When you accept this program, Aesir will:\n ::  Provide access to System Level 6 ores. \n ::  Protect you from pirates. \n ::  Replace your Venture if it is destroyed.\n ::  Purchase the ore that you mine \n \n Feel free to stop by <#776560170095607828> to chat, howl at the moon, and hear the latest rumors.\n When your ready to sell your ore head to <#776280849288921129> to see our rates for ore. \n \n Before moving forward, please adjust your discord tag to include the type of Venture you fly.  (VT, V1, V2, or V3) \n \n React to this message with: <:yes:776488521090465804> if you agree with the <#776943478416080978> and accept the offer. \n`);
-                    }).catch(console.error); */
-                }).catch(console.error);
-                msg.delete({ timeout: 600000 }).catch(console.error);
-              })
-        })
-        .catch(console.error);
-});
-
-client.on('message', (message: any) => {
-    var parts = message.content.split(" ");
-    if (message.author == client.user) {
-        if (parts[0] == 'Welcome') {
-            // This is one of our welcome messages above
-            message.react('🤝')
-            .then(() => message.react('<:miner:776567439701704714>'))
-            .then(() => message.react('🐺'));
-        }
-    }
+    console.log('Ready!');
+    // grab configuration from Firestore
+    admin.firestore().doc('configuration/industry-bot').onSnapshot((conf) => {
+        console.log('obtained new config');
+        if (!conf.data()) return;
+        confMaster = <ConfigurationMaster><any>conf.data();
+        client.channels.fetch(confMaster.the_woods_channel).then((channel:any) => {
+            channel.bulkDelete(100).then(() => {
+                channel.send(`Thanks for checking out our humble Discord. \n \n If you are joining our corporation, be sure to review the corp rules page once your application is approved. \n \n if you are here for diplomatic reasons, then welcome. \n \n Please select an option below to continue. \n \n 🤝 = Diplomacy \n 🐺 = join the wolf pack`).then((msg:any) => {
+                    msg.react('🤝').then(() => msg.react('🐺'));
+                })
+            }).catch(console.error);
+        }).catch(console.error);
+        client.channels.fetch(confMaster.hr_channel).then((channel:any) => {
+            channel.bulkDelete(100).then(() => {
+                channel.guild.roles.resolve('776841167123120158').members.forEach((mem:any) => {
+                    channel.send(`<@&796749710681178132>, <@${mem.id}> has joined the server and is interested in joining Aesir. React YES to accept, or NO to reject and boot from the server.`).then((msg:any) => {
+                        msg.react('<:yes:776488521090465804>')
+                        .then(() => msg.react('<:no:776488521414344815>'));
+                    })
+                });
+            }).catch(console.error);
+        }).catch(console.error);
+    });
 });
 
 client.on('message', (message: any) => {
@@ -91,18 +79,49 @@ client.on('message', (message: any) => {
 });
 
 client.on('messageReactionAdd', (messageReaction:any, user:any) => {
-    if(user.bot)  return;
     const { message, emoji } = messageReaction;
-    
-    if(emoji.name === "🐺") {
-        message.guild.member(user).roles.set(['776841167123120158']).catch(console.error);
+    if (user.bot) return;
+    if (message.channel.id == confMaster.the_woods_channel) {
+        if(emoji.name === "🐺") {
+            message.guild.member(user).roles.add('776841167123120158').catch(console.error);
+            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })}).then(() => {message.reactions.resolve("🐺").users.remove(user.id);});
+            client.channels.fetch(confMaster.hr_channel).then((channel:any) => {
+                channel.send(`<@&796749710681178132>, <@${user.id}> has joined the server and is interested in joining Aesir. React YES to accept, or NO to reject and boot from the server.`).then((msg:any) => {
+                    msg.react('<:yes:776488521090465804>')
+                    .then(() => msg.react('<:no:776488521414344815>'));
+                });
+            }).catch(console.error);
+
+        }
+        if(emoji.name === "🤝") {
+            message.guild.member(user).roles.add('776841070419247104').catch(console.error);
+            message.reactions.resolve("🤝").users.remove(user.id);
+            message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })}).then(() => {message.reactions.resolve("🤝").users.remove(user.id);});
+        }
     }
-    if(emoji.name === "miner") {
-        message.guild.member(user).roles.set(['776840866492842004']).catch(console.error);
-    }
-    if(emoji.name === "🤝") {
-        message.guild.member(user).roles.set(['776841070419247104']).catch(console.error);
+    if (message.channel.id == confMaster.hr_channel) {
+        var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
+        if (parts[0] === "<@&796749710681178132>") {
+            const refMem = parts[1].replace(/</g, '').replace(/@/g, '').replace(/&/g, '').replace(/>/g, '').replace(/!/g, '');
+            if (emoji.name === "yes") {
+                // allow member in
+                if (message.guild.member(refMem)) {
+                    message.guild.member(refMem).roles.set(['776243945285746689']).catch(console.error);
+                    message.channel.send(`<@${user.id}> has accepted <@${refMem}> into the corp!`);
+                } else {
+                    message.channel.send('That user has left the server.').then((msg:any) => {msg.delete({timeout:50000})});
+                }
+                message.delete();
+            }
+            if (emoji.name === "no") {
+                // kick member
+                message.guild.member(refMem).kick();
+                message.channel.send(`<@${user.id}> has kicked <@${refMem}>!`);
+                message.delete();
+            }
+        }
     }
 });
+
 
 client.login('Nzc2NTI5NDM5MTYwNzk1MTY1.X62NZQ.s90oWkajTJo2PLRk8HwksK7JaK8');
