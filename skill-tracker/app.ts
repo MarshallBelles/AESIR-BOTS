@@ -54,17 +54,204 @@ client.once('ready', () => {
     });
 });
 
-client.on('message', (message: any) => {
+lient.on('message', (message: any) => {
     var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
-    if (message.channel.id == confMaster.admin_channel) {
+    if (message.channel.id == confMaster.main_channel) {
         switch (parts[0]) {
-            case "a":
-                message.channel.send('You typed an A');
+            case "example": return;
+            case "h":
+                message.channel.send(`To claim ore contribution credit for the Aesir industry system: \n \`\`\`[ore] [quantity] m3 [station]\`\`\`\n In example, if you want to donate m3 of Dark Ochre at Clarelam, you would type the following in this channel: \n \`\`\`Dark Ochre 75000 m3 Clarelam\`\`\`\n If you want to donate ship debris for credit, type in the word Debris and the amount like so: \n \`\`\`Debris 200 Misaba\`\`\` \n You can also do the same as above for any modules or rigs that you contribute: \n \`\`\`Modules 30 mk7 Misaba\`\`\` \n To track a donation of ISK to the corp wallet, type in ISK [amount] like so: \n \`\`\` ISK 10,500,000 \`\`\` \n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` \n Type in Orders for the orders help dialogue: \n \`\`\`Orders \`\`\` \n Type in Insurance for the insurance help dialogue: \`\`\`Insurance \`\`\` \n `);
+            break;
+            case "help":
+                message.channel.send(`To claim ore contribution credit for the Aesir industry system: \n \`\`\`[ore] [quantity] m3 [station]\`\`\`\n In example, if you want to donate 75000 m3 of Dark Ochre at Clarelam, you would type the following in this channel: \n \`\`\`Dark Ochre 75000 m3 Clarelam\`\`\`\n If you want to donate ship debris for credit, type in the word Debris and the amount like so: \n \`\`\`Debris 200 Misaba\`\`\` \n You can also do the same as above for any modules or rigs that you contribute: \n \`\`\`Modules 30 mk7 Misaba\`\`\` \n To track a donation of ISK to the corp wallet, type in ISK [amount] like so: \n \`\`\` ISK 10,500,000 \`\`\` \n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` \n Type in Orders for the orders help dialogue: \n \`\`\`Orders \`\`\` \n Type in Insurance for the insurance help dialogue: \`\`\`Insurance \`\`\` \n `);
+            break;
+            case "veldspar":
+                if (parts[2] != 'm3') {message.delete({ timeout: 300000 });return;}
+                if (!parts[3]) {message.delete({ timeout: 300000 });return;}
+                if (confMaster.hangars.includes(parts[3])) {
+                    message.channel.send(`Thank you <@${message.member.id}> for submitting ${parts[1]} m3 of ${parts[0].charAt(0).toUpperCase() + parts[0].slice(1)}! \n Please place the contribution in ${parts[3].charAt(0).toUpperCase() + parts[3].slice(1)} hangar 1 if you have not done so already.\n \nPlease note that ${parts[0].charAt(0).toUpperCase() + parts[0].slice(1)} does not count towards industry credit.`);
+                } else {
+                    message.channel.send(`${parts[3]} is not a valid location.`)
+                }
+            break;
+            case "debris":
+                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
+                if (confMaster.hangars.includes(parts[2])) {
+                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
+                    saveContribution((<number>parts[1] * 0.15), message.member.id, donationType.debris, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2]);
+                } else {
+                    message.channel.send(`${parts[2]} is not a valid location.`)
+                }
+            break;
+            case "modules":
+                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
+                let multiplier = 1;
+                switch (parts[2]) {
+                    case "mk3":
+                        if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
+                        {multiplier = 0.1}
+                    break;
+                    case "mk5":
+                        if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
+                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
+                        {multiplier = 0.1}
+                    break;
+                    case "mk7":
+                        if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
+                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
+                        if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {} else
+                        {multiplier = 0.2}
+                    break;
+                    case "mk9":
+                    break;
+                    case "c":
+                    break;
+                    case "story":
+                    break;
+                    case "faction":
+                    break;
+                    default:
+                        message.channel.send(` Proper Usage: \`\`\`\n Modules [amount] [type] [location] \`\`\`\n Valid Types: mk5, mk7, mk9, C, story, faction \n Valid locations: ${confMaster.hangars}`);
+                        {message.delete({ timeout: 300000 });return;}
+                    }
+                    if (confMaster.hangars.includes(parts[3])) {
+                        message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[2]} ${parts[0]}! \n Please place the contribution in ${parts[3].charAt(0).toUpperCase() + parts[3].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
+                        saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.module, (parts[2] + ' ' + parts[0]), parts[3]);
+                    } else {
+                        message.channel.send(` Please try again. \n Proper Usage: \`\`\`\n Modules [amount] [type] [location] \`\`\`\n Valid Types: mk5, mk7, mk9, C, story, faction \n Valid locations: ${confMaster.hangars}`);
+                }
+            break;
+            case "b":
+                checkBalance(message.member.id, message);
+            break;
+            case "balance":
+                checkBalance(message.member.id, message);
             break;
             default:
             break;
         }
+        message.delete({ timeout: 300000 });
     }
 });
+
+// const saveContribution = (amt:any, member:string, type:donationType, name?:string, location?:string) => {
+//     const claim:Claim = <Claim>{amount:parseFloat(amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now()};
+//     const id = admin.firestore().collection('data/industry-bot/claims').doc().id;
+//     admin.firestore().doc(`data/industry-bot/claims/${id}`).set(claim).then(() => {
+//         client.channels.fetch(confMaster.admin_channel).then((channel:any) => {
+//             const displayData:any = {};
+//             displayData.type = claim.name;
+//             displayData.amount = claim.amount;
+//             displayData.location = claim.location;
+//             channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
+//                 msg.react('<:yes:776488521090465804>')
+//                     .then(() => msg.react('<:no:776488521414344815>'));
+//             });
+//         }).catch(console.error);
+//     }).catch(console.error);
+//     admin.firestore().doc(`data/industry-bot/members/${member}`).get().then(doc => {
+//         if (!doc.exists) {
+//             const member:Member = <Member>{credits: 0, officer: false, pack_member: false, direwolf: false, confirmed_dmr: 0, confirmed_ore: 0};
+//             doc.ref.set(member).catch(console.error);
+//         }
+//     }).catch(console.error);
+// }
+
+// const checkBalance = (member:string, message:any) => {
+//     admin.firestore().doc(`data/industry-bot/members/${member}`).get().then(doc => {
+//         if (!doc.exists) {
+//             message.channel.send(`<@${member}>, you have not participated in the industry program. Please track your contributions and then try again.`)
+//         } else {
+//             admin.firestore().collection('data/industry-bot/claims').where('member', '==', member).where('approved','==',true).where('credited','==',false).get().then(clms => {
+//                 if(clms.docs.length > 0) {
+//                     let process_arr = [];
+//                     let totalOre = 0;
+//                     let totalDMR = 0;
+//                     clms.docs.forEach(clm => {
+//                         let cl = <Claim>clm.data();
+//                         if (cl.type == donationType.ore) {
+//                             totalOre += cl.amount;
+//                             cl.credited = true;
+//                             process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+//                         } else if (cl.type == donationType.isk) {
+//                             cl.credited = true;
+//                             process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+//                         } else {
+//                             totalDMR += cl.amount;
+//                             cl.credited = true;
+//                             process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+//                         }
+//                     });
+//                     let mem = <Member>doc.data();
+//                     if (mem) {
+//                         mem.confirmed_ore += totalOre;
+//                         mem.confirmed_dmr += totalDMR;
+//                         if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")){
+//                             //4000 ore hold
+//                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 6000)) {
+//                                 // add to credits
+//                                 mem.credits += 1;
+//                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 6000);
+//                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
+//                             }
+//                         } else
+//                         if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")){
+//                             //6000
+//                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 9000)) {
+//                                 // add to credits
+//                                 mem.credits += 1;
+//                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 9000);
+//                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
+//                             }
+//                         } else
+//                         if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")){
+//                             //9000
+//                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 26500)) {
+//                                 // add to credits
+//                                 mem.credits += 1;
+//                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 26500);
+//                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
+//                             }
+//                         } else
+//                         if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")){
+//                             //25000
+//                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 42000)) {
+//                                 // add to credits
+//                                 mem.credits += 1;
+//                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 42000);
+//                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
+//                             }
+//                         } else {
+//                             // admin that a role is not assigned
+//                         }
+//                         if (mem.confirmed_dmr > confMaster.dmr_per_credit) {
+//                             while (mem.confirmed_dmr > confMaster.dmr_per_credit) {
+//                                 // add to credits
+//                                 mem.credits += 1;
+//                                 mem.confirmed_dmr -= confMaster.dmr_per_credit;
+//                                 mem.confirmed_dmr = Math.round(mem.confirmed_dmr);
+//                             }
+//                         }
+//                         process_arr.push(doc.ref.set(mem));
+//                     }
+//                     Promise.all(process_arr).then(returnDat => {
+//                         admin.firestore().doc(`data/skill-bot/members/${doc.id}`).get().then(doc2 => {
+//                             const dat2 = <Member>doc2.data();
+//                             if (dat2) {
+//                                 message.channel.send(`<@${member}>, your current industry balance is ${dat2.credits} credit(s) \n \`\`\` Confirmed Ore: ${dat2.confirmed_ore} m3 \n Fighter Points: ${dat2.confirmed_dmr} \`\`\``);
+//                             }
+//                         });
+//                     }).catch(console.error);
+//                 } else {
+//                     const dat = doc.data();
+//                     if (dat) {
+//                         message.channel.send(`<@${member}>, your current industry balance is ${dat.credits} credit(s) \n \`\`\` Confirmed Ore: ${dat.confirmed_ore} m3 \n Fighter Points: ${dat.confirmed_dmr} \`\`\``);
+//                         // TODO: tell user how much more ore / dmr they need until their next credit
+//                     }
+//                 }
+//             }).catch(console.error);
+//         }
+//     });
+// }
 
 client.login('NzkwODA1MjM0OTI1NDM2OTY4.X-F8xA.qOIAk7mOEjVtg0kjZpE5xbvbP1Q');
