@@ -25,7 +25,9 @@ interface ConfigurationMaster {
     hr_channel: string,
     tech_level_channel: string,
     the_woods_channel: string,
+    orders_channel: string,
     skills_channel: string,
+    fighter_channel: string,
     hangars: string[],
     ore_holds_per_credit: number,
     dmr_per_credit: number,
@@ -78,7 +80,7 @@ client.once('ready', () => {
         confMaster = <ConfigurationMaster><any>conf.data();
         client.channels.fetch(confMaster.main_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
-                channel.send(`Example commands: \`\`\`H | Help - Expanded help menu \nSpodumain 85000.3 m3 Misaba - Claim spodumain ore contribution for credit at Misaba \nDebris 200 Clarelam - Claim ship debris contribution for credit at Clarelam \nModules 20 mk5 Misaba - Claim module contribution credit at Misaba \nISK 20,000,000 - Claim 20M isk donation to corp wallet\nB | Balance - Display your industry system credit balance \nOrders Queue - view current order queue \nInsurance - provides instructions \`\`\``);
+                channel.send(`Track your ore contributions here: \`\`\`H | Help - Expanded help menu \nSpodumain 85000.3 m3 Misaba - Claim spodumain ore contribution for credit at Misaba \nB | Balance - Display your industry system credit balance \`\`\``);
             }).catch(console.error);
         }).catch(console.error);
         client.channels.fetch(confMaster.tech_level_channel).then((channel:any) => {
@@ -211,12 +213,12 @@ client.on('message', (message: any) => {
     var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
     if (message.channel.id == confMaster.main_channel) {
         switch (parts[0]) {
-            case "example": return;
+            case "Track": return;
             case "h":
-                message.channel.send(`To claim ore contribution credit for the Aesir industry system: \n \`\`\`[ore] [quantity] m3 [station]\`\`\`\n In example, if you want to donate m3 of Dark Ochre at Clarelam, you would type the following in this channel: \n \`\`\`Dark Ochre 75000 m3 Clarelam\`\`\`\n If you want to donate ship debris for credit, type in the word Debris and the amount like so: \n \`\`\`Debris 200 Misaba\`\`\` \n You can also do the same as above for any modules or rigs that you contribute: \n \`\`\`Modules 30 mk7 Misaba\`\`\` \n To track a donation of ISK to the corp wallet, type in ISK [amount] like so: \n \`\`\` ISK 10,500,000 \`\`\` \n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` \n Type in Orders for the orders help dialogue: \n \`\`\`Orders \`\`\` \n Type in Insurance for the insurance help dialogue: \`\`\`Insurance \`\`\` \n `);
+                message.channel.send(`To claim ore contribution credit for the Aesir industry system: \n \`\`\`[ore] [quantity] m3 [station]\`\`\`\n In example, if you want to donate m3 of Dark Ochre at Clarelam, you would type the following in this channel: \n \`\`\`Dark Ochre 75000 m3 Clarelam\`\`\`\n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` `);
             break;
             case "help":
-                message.channel.send(`To claim ore contribution credit for the Aesir industry system: \n \`\`\`[ore] [quantity] m3 [station]\`\`\`\n In example, if you want to donate 75000 m3 of Dark Ochre at Clarelam, you would type the following in this channel: \n \`\`\`Dark Ochre 75000 m3 Clarelam\`\`\`\n If you want to donate ship debris for credit, type in the word Debris and the amount like so: \n \`\`\`Debris 200 Misaba\`\`\` \n You can also do the same as above for any modules or rigs that you contribute: \n \`\`\`Modules 30 mk7 Misaba\`\`\` \n To track a donation of ISK to the corp wallet, type in ISK [amount] like so: \n \`\`\` ISK 10,500,000 \`\`\` \n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` \n Type in Orders for the orders help dialogue: \n \`\`\`Orders \`\`\` \n Type in Insurance for the insurance help dialogue: \`\`\`Insurance \`\`\` \n `);
+                message.channel.send(`To claim ore contribution credit for the Aesir industry system: \n \`\`\`[ore] [quantity] m3 [station]\`\`\`\n In example, if you want to donate m3 of Dark Ochre at Clarelam, you would type the following in this channel: \n \`\`\`Dark Ochre 75000 m3 Clarelam\`\`\`\n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` `);
             break;
             case "veldspar":
                 if (parts[2] != 'm3') {message.delete({ timeout: 300000 });return;}
@@ -383,127 +385,6 @@ client.on('message', (message: any) => {
                     message.channel.send(`${parts[3]} is not a valid location.`)
                 }
             break;
-            case "debris":
-                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                if (confMaster.hangars.includes(parts[2])) {
-                    let multiplier = 1.0;
-                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                    {multiplier = 0.33}
-                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.debris, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
-                } else {
-                    message.channel.send(`${parts[2]} is not a valid location.`)
-                }
-            break;
-            case "modules":
-                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                let multiplier = 1;
-                switch (parts[2]) {
-                    case "mk3":
-                        if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                        {multiplier = 0.0}
-                    break;
-                    case "mk5":
-                        if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
-                        if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.66} else
-                        {multiplier = 0.1}
-                    break;
-                    case "mk7":
-                        if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 1.33} else
-                        if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {} else
-                        {multiplier = 0.2}
-                    break;
-                    case "mk9":
-                        if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 1.66} else
-                        if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 1.33} else
-                        {}
-                    break;
-                    case "c":
-                    break;
-                    case "story":
-                    break;
-                    case "faction":
-                    break;
-                    default:
-                        message.channel.send(` Proper Usage: \`\`\`\n Modules [amount] [type] [location] \`\`\`\n Valid Types: mk5, mk7, mk9, C, story, faction \n Valid locations: ${confMaster.hangars}`);
-                        {message.delete({ timeout: 300000 });return;}
-                    }
-                    if (confMaster.hangars.includes(parts[3])) {
-                        message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[2]} ${parts[0]}! \n Please place the contribution in ${parts[3].charAt(0).toUpperCase() + parts[3].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                        saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.module, (parts[2] + ' ' + parts[0]), parts[3], parts[1]);
-                    } else {
-                        message.channel.send(` Please try again. \n Proper Usage: \`\`\`\n Modules [amount] [type] [location] \`\`\`\n Valid Types: mk5, mk7, mk9, C, story, faction \n Valid locations: ${confMaster.hangars}`);
-                }
-            break;
-            case "rigs":
-                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                if (confMaster.hangars.includes(parts[2])) {
-                    let multiplier = 0.2;
-                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {multiplier = 0.5} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.1} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0}
-                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
-                } else {
-                    message.channel.send(`${parts[2]} is not a valid location.`)
-                }
-            break;
-            case "blueprints":
-                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                if (confMaster.hangars.includes(parts[2])) {
-                    let multiplier = 0.5;
-                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 0.2} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 0.1} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 0}
-                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
-                } else {
-                    message.channel.send(`${parts[2]} is not a valid location.`)
-                }
-            break;
-            case "datacores":
-                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                if (confMaster.hangars.includes(parts[2])) {
-                    let multiplier = 1;
-                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {multiplier = 20} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 13} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 6} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 3}
-                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ${parts[0]}! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, (parts[0].charAt(0).toUpperCase() + parts[0].slice(1)), parts[2], parts[1]);
-                } else {
-                    message.channel.send(`${parts[2]} is not a valid location.`)
-                }
-            break;
-            case "faction":
-                if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                if (confMaster.hangars.includes(parts[2])) {
-                    let multiplier = 1;
-                    if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")) {} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {multiplier = 30} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {multiplier = 15} else
-                    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {multiplier = 6}
-                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} Faction Debris! \n Please place the contribution in ${parts[2].charAt(0).toUpperCase() + parts[2].slice(1)} hangar 1 if you have not done so already. \n It can take up to a day for this contribution to reflect on your balance.`);
-                    saveContribution((<number>parts[1] * multiplier), message.member.id, donationType.rig, "Faction Debris", parts[2], parts[1]);
-                } else {
-                    message.channel.send(`${parts[2]} is not a valid location.`)
-                }
-            break;
-            case "isk":
-                    if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ISK! \n`);
-                    saveContribution(<number>parts[1], message.member.id, donationType.isk, "ISK", "Wallet");
-            break;
-            case "orders":
-                message.channel.send(`Not implemented.`)
-            break;
-            case "insurance":
-                message.channel.send(`Not implemented.`)
-            break;
             case "b":
                 checkBalance(message.member.id, message);
             break;
@@ -633,7 +514,6 @@ const checkBalance = (member:string, message:any) => {
                     const dat = doc.data();
                     if (dat) {
                         message.channel.send(`<@${member}>, your current industry balance is ${dat.credits} credit(s) \n \`\`\` Confirmed Ore: ${dat.confirmed_ore} m3 \n Fighter Points: ${dat.confirmed_dmr} \`\`\``);
-                        // TODO: tell user how much more ore / dmr they need until their next credit
                     }
                 }
             }).catch(console.error);

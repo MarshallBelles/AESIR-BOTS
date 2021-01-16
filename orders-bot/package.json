@@ -1,5 +1,5 @@
 {
-  "name": "industry-bot",
+  "name": "orders-bot",
   "version": "1.0.0",
   "description": "Aesir Industry Bot",
   "main": "index.js",

@@ -15,21 +15,57 @@ cp build/app.js /opt/bots/production/aesir-wolf-pack/awp.js;
 cp package.json /opt/bots/production/aesir-wolf-pack/package.json;
 cp package-lock.json /opt/bots/production/aesir-wolf-pack/package-lock.json;
 cd ..;
-# Prepare industry-bot
-cd industry-bot;
+
+# Prepare ore-bot
+cd ore-bot;
 npm i;
 rm -rf build;
 tsc ./app.ts;
-rm -rf /opt/bots/production/industry-bot;
-mkdir /opt/bots/production/industry-bot;
+rm -rf /opt/bots/production/ore-bot;
+mkdir /opt/bots/production/ore-bot;
 mkdir build;
 mv ./app.js build;
-cp build/app.js /opt/bots/production/industry-bot/inb.js;
-cp package.json /opt/bots/production/industry-bot/package.json;
-cp package-lock.json /opt/bots/production/industry-bot/package-lock.json;
+cp build/app.js /opt/bots/production/ore-bot/inb.js;
+cp package.json /opt/bots/production/ore-bot/package.json;
+cp package-lock.json /opt/bots/production/ore-bot/package-lock.json;
+cd ..;
+
+# Prepare fighter-bot
+cd fighter-bot;
+npm i;
+rm -rf build;
+tsc ./app.ts;
+rm -rf /opt/bots/production/fighter-bot;
+mkdir /opt/bots/production/fighter-bot;
+mkdir build;
+mv ./app.js build;
+cp build/app.js /opt/bots/production/fighter-bot/inb.js;
+cp package.json /opt/bots/production/fighter-bot/package.json;
+cp package-lock.json /opt/bots/production/fighter-bot/package-lock.json;
+cd ..;
+
+# Prepare orders-bot
+cd orders-bot;
+npm i;
+rm -rf build;
+tsc ./app.ts;
+rm -rf /opt/bots/production/orders-bot;
+mkdir /opt/bots/production/orders-bot;
+mkdir build;
+mv ./app.js build;
+cp build/app.js /opt/bots/production/orders-bot/inb.js;
+cp package.json /opt/bots/production/orders-bot/package.json;
+cp package-lock.json /opt/bots/production/orders-bot/package-lock.json;
+
 cd /opt/bots/production/aesir-wolf-pack;
 npm i;
 nohup node awp.js &
-cd ../industry-bot;
+cd ../ore-bot;
+npm i;
+nohup node inb.js &
+cd ../orders-bot;
+npm i;
+nohup node inb.js &
+cd ../fighter-bot;
 npm i;
 nohup node inb.js &
