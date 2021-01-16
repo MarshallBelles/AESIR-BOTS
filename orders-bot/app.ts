@@ -59,7 +59,7 @@ client.once('ready', () => {
         console.log('obtained new config');
         if (!conf.data()) return;
         confMaster = <ConfigurationMaster><any>conf.data();
-        client.channels.fetch(confMaster.main_channel).then((channel:any) => {
+        client.channels.fetch(confMaster.orders_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
                 channel.send(``);
             }).catch(console.error);
@@ -71,12 +71,10 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     const { message, emoji } = messageReaction;
     if(user.bot)  {return;}
     if (message.author == client.user) {
-        if (message.channel.id == confMaster.admin_channel) {
+        if (message.channel.id == confMaster.orders_channel) {
             if(emoji.name === "yes") {
-                approveContribution(message, user);
             }
             if(emoji.name === "no") {
-                declineContribution(message, user);
             }
         }
     }
