@@ -87,7 +87,7 @@ client.once('ready', () => {
 });
 
 client.on('message', (message: any) => {
-    var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
+    var parts = message.content.toLowerCase().replace(/,/g, '').replace(/'/g, '').split(" ");
     if (message.channel.id == confMaster.fighter_channel) {
         switch (parts[0]) {
             case "track": return;
@@ -207,9 +207,84 @@ client.on('message', (message: any) => {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
             break;
+            case "spark":
+                if (parts[1] == 'of' && parts[2] == 'rebellion') {
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 3));
+                }
+            break;
             case "super":
-                if (parts[2] == 'soft' && parts[3] == 'drink') {
-                    // reporting story mission 
+                if (parts[1] == 'soft' && parts[2] == 'drink') {
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 3));
+                }
+            break;
+            case "for":
+                if (parts[1] == 'patriotism') {
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 2));
+                }
+            break;
+            case "for":
+                if (parts[1] == 'freedom') {
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 2));
+                }
+            break;
+            case "true":
+                if (parts[1] == 'divine' && parts[2] == 'trial') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 3));
+                }
+            break;
+            case "divine":
+                if (parts[1] == 'redemption') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                }
+            break;
+            case "modern":
+                if (parts[1] == 'world') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                }
+            break;
+            case "business":
+                if (parts[1] == 'magnate') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2)); 
+                }
+            break;
+            case "mega":
+                if (parts[1] == 'corporation') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                }
+            break;
+            case "a":
+                if (parts[1] == 'soldiers' && parts[2] == 'way') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 3));
+                }
+            break;
+            case "matar":
+                if (parts[1] == 'reborn') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                }
+            break;
+            case "disaster":
+                if (parts[1] == 'relief') {
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                }
+            break;
+            case "friends":
+                if (parts[1] == 'by' && parts[2] == 'blood') {
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3));
+                }
+            break;
+            case "sweet":
+                if (parts[1] == 'poison') {
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 2));
+                }
+            break;
+            case "bad":
+                if (parts[1] == 'hare' && parts[2] == 'day') {
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3));
+                }
+            break;
+            case "angel":
+                if (parts[1] == 'or' && parts[2] == 'devil') {
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3));
                 }
             break;
             case "b":
@@ -250,6 +325,28 @@ const saveContribution = (credit_amt:any, member:string, type:donationType, name
             doc.ref.set(member).catch(console.error);
         }
     }).catch(console.error);
+}
+
+const getHelpers = (message:any, startingIndex:number):string[] => {
+    var parts = message.content.toLowerCase().replace(/,/g, '').replace(/'/g, '').split(" ");
+    let helpers:string[] = [];
+    for (let index = startingIndex; index < parts.length; index++) {
+        const element = parts[index];
+        helpers.push(element);
+    }
+    return helpers;
+}
+
+const storyMission = (message:any, t1:number, t2:number, t3:number, h:number, helpers:string[]) => {
+    if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {
+        //
+    } else
+    if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {
+        //
+    } else
+    if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {
+        //
+    }
 }
 
 const checkBalance = (member:string, message:any) => {
