@@ -213,7 +213,7 @@ client.on('message', (message: any) => {
     var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
     if (message.channel.id == confMaster.main_channel) {
         switch (parts[0]) {
-            case "Track": return;
+            case "track": return;
             case "h":
                 message.channel.send(`To claim ore contribution credit for the Aesir industry system: \n \`\`\`[ore] [quantity] m3 [station]\`\`\`\n In example, if you want to donate m3 of Dark Ochre at Clarelam, you would type the following in this channel: \n \`\`\`Dark Ochre 75000 m3 Clarelam\`\`\`\n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` `);
             break;

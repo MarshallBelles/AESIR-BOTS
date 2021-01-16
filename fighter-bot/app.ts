@@ -90,7 +90,7 @@ client.on('message', (message: any) => {
     var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
     if (message.channel.id == confMaster.fighter_channel) {
         switch (parts[0]) {
-            case "Track": return;
+            case "track": return;
             case "h":
                 message.channel.send(`To claim fighter contribution credit for the Aesir industry system: \n If you want to donate ship debris for credit, type in the word Debris and the amount like so: \n \`\`\`Debris 200 Misaba\`\`\` \n You can also do the same as above for any modules or rigs that you contribute: \n \`\`\`Modules 30 mk7 Misaba\`\`\` \n If you want to review your industry balance, type in B or Balance: \n \`\`\`B \`\`\` \n `);
             break;
@@ -206,17 +206,6 @@ client.on('message', (message: any) => {
                 } else {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
-            break;
-            case "isk":
-                    if (!parts[1]) {message.delete({ timeout: 300000 });return;}
-                    message.channel.send(`Thank you <@${message.member.id}> for tracking your contribution of ${parts[1]} ISK! \n`);
-                    saveContribution(<number>parts[1], message.member.id, donationType.isk, "ISK", "Wallet");
-            break;
-            case "orders":
-                message.channel.send(`Not implemented.`)
-            break;
-            case "insurance":
-                message.channel.send(`Not implemented.`)
             break;
             case "b":
                 checkBalance(message.member.id, message);

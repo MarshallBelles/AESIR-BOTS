@@ -115,10 +115,14 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
             }
             if (emoji.name === "no") {
                 // kick member
-                message.guild.member(refMem).kick();
-                message.channel.send(`<@${user.id}> has kicked <@${refMem}>!`);
-                message.delete();
-            }
+                if (message.guild.member(refMem)) {
+                    message.guild.member(refMem).kick();
+                    message.channel.send(`<@${user.id}> has kicked <@${refMem}>!`);
+                    message.delete();
+                }
+                } else {
+                    message.channel.send('That user has left the server.').then((msg:any) => {msg.delete({timeout:50000})});
+                }
         }
     }
 });
