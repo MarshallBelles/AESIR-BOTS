@@ -207,6 +207,11 @@ client.on('message', (message: any) => {
                     message.channel.send(`${parts[2]} is not a valid location.`)
                 }
             break;
+            case "super":
+                if (parts[2] == 'soft' && parts[3] == 'drink') {
+                    // reporting story mission 
+                }
+            break;
             case "b":
                 checkBalance(message.member.id, message);
             break;
@@ -328,14 +333,14 @@ const checkBalance = (member:string, message:any) => {
                         admin.firestore().doc(`data/industry-bot/members/${doc.id}`).get().then(doc2 => {
                             const dat2 = <Member>doc2.data();
                             if (dat2) {
-                                message.channel.send(`<@${member}>, your current industry balance is ${dat2.credits} credit(s) \n \`\`\` Confirmed Ore: ${dat2.confirmed_ore} m3 \n Fighter Points: ${dat2.confirmed_dmr} \`\`\``);
+                                message.channel.send(`<@${member}>, your current industry balance is ${dat2.credits} credit(s) \n \`\`\` Confirmed Ore: ${dat2.confirmed_ore} m3 \n Fighter Points: ${Math.round(dat2.confirmed_dmr)} \`\`\``);
                             }
                         });
                     }).catch(console.error);
                 } else {
                     const dat = doc.data();
                     if (dat) {
-                        message.channel.send(`<@${member}>, your current industry balance is ${dat.credits} credit(s) \n \`\`\` Confirmed Ore: ${dat.confirmed_ore} m3 \n Fighter Points: ${dat.confirmed_dmr} \`\`\``);
+                        message.channel.send(`<@${member}>, your current industry balance is ${dat.credits} credit(s) \n \`\`\` Confirmed Ore: ${dat.confirmed_ore} m3 \n Fighter Points: ${Math.round(dat.confirmed_dmr)} \`\`\``);
                     }
                 }
             }).catch(console.error);

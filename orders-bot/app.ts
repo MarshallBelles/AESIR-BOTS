@@ -61,7 +61,7 @@ client.once('ready', () => {
         confMaster = <ConfigurationMaster><any>conf.data();
         client.channels.fetch(confMaster.orders_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
-                channel.send(``);
+                channel.send(`Industry Orders Bot`);
             }).catch(console.error);
         }).catch(console.error);
     });
