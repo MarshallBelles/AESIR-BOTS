@@ -46,7 +46,9 @@ interface Claim {
     name: string,
     location: string,
     credited: boolean,
-    timestamp: number
+    timestamp: number,
+    helpers?: string[],
+    helper_credit?: number
 }
 
 interface Member {
@@ -63,7 +65,8 @@ enum donationType {
     debris,
     module,
     rig,
-    isk
+    isk,
+    story
 }
 
 const Discord = require('discord.js');
@@ -209,82 +212,82 @@ client.on('message', (message: any) => {
             break;
             case "spark":
                 if (parts[1] == 'of' && parts[2] == 'rebellion') {
-                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 3));
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 3), 'Spark Of Rebellion');
                 }
             break;
             case "super":
                 if (parts[1] == 'soft' && parts[2] == 'drink') {
-                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 3));
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 3), 'Super Soft Drink');
                 }
             break;
             case "for":
                 if (parts[1] == 'patriotism') {
-                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 2));
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 2), 'For Patriotism');
                 }
             break;
             case "for":
                 if (parts[1] == 'freedom') {
-                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 2));
+                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 2), 'For Freedom');
                 }
             break;
             case "true":
                 if (parts[1] == 'divine' && parts[2] == 'trial') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 3));
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 3), 'True Divine Trial');
                 }
             break;
             case "divine":
                 if (parts[1] == 'redemption') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2), 'Divine Redemption');
                 }
             break;
             case "modern":
                 if (parts[1] == 'world') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2), 'Modern World');
                 }
             break;
             case "business":
                 if (parts[1] == 'magnate') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2)); 
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2), 'Business Magnate');
                 }
             break;
             case "mega":
                 if (parts[1] == 'corporation') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2), 'Mega Corporation');
                 }
             break;
             case "a":
                 if (parts[1] == 'soldiers' && parts[2] == 'way') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 3));
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 3), 'A Soldiers Way');
                 }
             break;
             case "matar":
                 if (parts[1] == 'reborn') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2), 'Matar Reborn');
                 }
             break;
             case "disaster":
                 if (parts[1] == 'relief') {
-                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2));
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2), 'Disaster Relief');
                 }
             break;
             case "friends":
                 if (parts[1] == 'by' && parts[2] == 'blood') {
-                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3));
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3), 'Friends By Blood');
                 }
             break;
             case "sweet":
                 if (parts[1] == 'poison') {
-                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 2));
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 2), 'Sweet Poison');
                 }
             break;
             case "bad":
                 if (parts[1] == 'hare' && parts[2] == 'day') {
-                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3));
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3), 'Bad Hare Day');
                 }
             break;
             case "angel":
                 if (parts[1] == 'or' && parts[2] == 'devil') {
-                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3));
+                    storyMission(message, 375, 120, 63, 18, getHelpers(message, 3), 'Angel Or Devil');
                 }
             break;
             case "b":
@@ -300,8 +303,8 @@ client.on('message', (message: any) => {
     }
 });
 
-const saveContribution = (credit_amt:any, member:string, type:donationType, name?:string, location?:string, amount?:any) => {
-    const claim:Claim = <Claim>{amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now()};
+const saveContribution = (credit_amt:any, member:string, type:donationType, name?:string, location?:string, amount?:any, helpers?:string[], helperCredit?:number) => {
+    const claim:Claim = <Claim>{amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now(), helpers, helper_credit: helperCredit};
     const id = admin.firestore().collection('data/industry-bot/claims').doc().id;
     admin.firestore().doc(`data/industry-bot/claims/${id}`).set(claim).then(() => {
         client.channels.fetch(confMaster.admin_channel).then((channel:any) => {
@@ -311,6 +314,9 @@ const saveContribution = (credit_amt:any, member:string, type:donationType, name
                 displayData.amount = amount;
             } else {
                 displayData.amount = claim.amount;
+            }
+            if (type == donationType.story) {
+                displayData.helpers = helpers;
             }
             displayData.location = claim.location;
             channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
@@ -337,16 +343,34 @@ const getHelpers = (message:any, startingIndex:number):string[] => {
     return helpers;
 }
 
-const storyMission = (message:any, t1:number, t2:number, t3:number, h:number, helpers:string[]) => {
+const storyMission = (message:any, t1:number, t2:number, t3:number, h:number, helpers:string[], name:string) => {
     if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {
-        //
+        saveContribution(t1, message, donationType.story, name, 'N/A', 1, helpers, h);
+        message.channel.send(`Thank you <@${message.member.id}> for tracking your story mission run of ${name}! You and any helpers should receive fighter credit within a day.`);
     } else
     if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {
-        //
+        saveContribution(t2, message, donationType.story, name, 'N/A', 1, helpers, h);
+        message.channel.send(`Thank you <@${message.member.id}> for tracking your story mission run of ${name}! You and any helpers should receive fighter credit within a day.`);
     } else
     if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {
-        //
+        saveContribution(t3, message, donationType.story, name, 'N/A', 1, helpers, h);
+        message.channel.send(`Thank you <@${message.member.id}> for tracking your story mission run of ${name}! You and any helpers should receive fighter credit within a day.`);
     }
+}
+
+const grantHelperCredit = (helper: string, credit:number): Promise<any> => {
+    return admin.firestore().doc(`data/industry-bot/members/${helper}`).get().then(doc => {
+        if (!doc.exists) {
+            let mem = <Member>{credits: 0, officer: false, pack_member: false, direwolf: false, confirmed_dmr: credit, confirmed_ore: 0};
+            // this is a new user that is getting credit
+            admin.firestore().doc(`data/industry-bot/members/${helper}`).set(mem).catch(console.error);
+        } else {
+            // existing user is getting the credit
+            let mem = <Member>doc.data();
+            mem.confirmed_dmr += credit;
+            doc.ref.set(mem).catch(console.error);
+        }
+    })
 }
 
 const checkBalance = (member:string, message:any) => {
@@ -372,6 +396,15 @@ const checkBalance = (member:string, message:any) => {
                             totalDMR += cl.amount;
                             cl.credited = true;
                             process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+                        }
+                        if (cl.helpers && cl.helper_credit) {
+                            if (cl.helpers.length > 0) {
+                                // we have more than 0 helpers.
+                                const credit = cl.helper_credit / cl.helpers.length;
+                                cl.helpers.forEach((hlpr:string) => {
+                                    process_arr.push(grantHelperCredit(hlpr, credit));
+                                });
+                            }
                         }
                     });
                     let mem = <Member>doc.data();

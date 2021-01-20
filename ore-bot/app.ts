@@ -46,7 +46,9 @@ interface Claim {
     name: string,
     location: string,
     credited: boolean,
-    timestamp: number
+    timestamp: number,
+    helpers?: string[],
+    helper_credit?: number
 }
 
 interface Member {
@@ -63,7 +65,8 @@ enum donationType {
     debris,
     module,
     rig,
-    isk
+    isk,
+    story
 }
 
 const Discord = require('discord.js');
@@ -104,6 +107,9 @@ client.once('ready', () => {
                             displayData.type = tmp.name;
                             displayData.amount = tmp.amount;
                             displayData.location = tmp.location;
+                            if (tmp.type == donationType.story) {
+                                displayData.helpers = tmp.helpers;
+                            }
                             channel.send(`<@&791340711445921812>, <@${tmp.member}> has claimed a donation: ${doc.id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
                                 msg.react('<:yes:776488521090465804>')
                                     .then(() => msg.react('<:no:776488521414344815>'));
@@ -398,7 +404,7 @@ client.on('message', (message: any) => {
     }
 });
 
-const saveContribution = (credit_amt:any, member:string, type:donationType, name?:string, location?:string, amount?:any) => {
+const saveContribution = (credit_amt:any, member:string, type:donationType, name?:string, location?:string, amount?:any, helpers?:string[], helperCredit?:number) => {
     const claim:Claim = <Claim>{amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now()};
     const id = admin.firestore().collection('data/industry-bot/claims').doc().id;
     admin.firestore().doc(`data/industry-bot/claims/${id}`).set(claim).then(() => {
@@ -409,6 +415,9 @@ const saveContribution = (credit_amt:any, member:string, type:donationType, name
                 displayData.amount = amount;
             } else {
                 displayData.amount = claim.amount;
+            }
+            if (type == donationType.story) {
+                displayData.helpers = helpers;
             }
             displayData.location = claim.location;
             channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
@@ -423,6 +432,21 @@ const saveContribution = (credit_amt:any, member:string, type:donationType, name
             doc.ref.set(member).catch(console.error);
         }
     }).catch(console.error);
+}
+
+const grantHelperCredit = (helper: string, credit:number): Promise<any> => {
+    return admin.firestore().doc(`data/industry-bot/members/${helper}`).get().then(doc => {
+        if (!doc.exists) {
+            let mem = <Member>{credits: 0, officer: false, pack_member: false, direwolf: false, confirmed_dmr: credit, confirmed_ore: 0};
+            // this is a new user that is getting credit
+            admin.firestore().doc(`data/industry-bot/members/${helper}`).set(mem).catch(console.error);
+        } else {
+            // existing user is getting the credit
+            let mem = <Member>doc.data();
+            mem.confirmed_dmr += credit;
+            doc.ref.set(mem).catch(console.error);
+        }
+    })
 }
 
 const checkBalance = (member:string, message:any) => {
@@ -448,6 +472,15 @@ const checkBalance = (member:string, message:any) => {
                             totalDMR += cl.amount;
                             cl.credited = true;
                             process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+                        }
+                        if (cl.helpers && cl.helper_credit) {
+                            if (cl.helpers.length > 0) {
+                                // we have more than 0 helpers.
+                                const credit = cl.helper_credit / cl.helpers.length;
+                                cl.helpers.forEach((hlpr:string) => {
+                                    process_arr.push(grantHelperCredit(hlpr, credit));
+                                });
+                            }
                         }
                     });
                     let mem = <Member>doc.data();
