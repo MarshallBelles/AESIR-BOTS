@@ -110,10 +110,19 @@ client.once('ready', () => {
                             if (tmp.type == donationType.story) {
                                 displayData.helpers = tmp.helpers;
                             }
-                            channel.send(`<@&791340711445921812>, <@${tmp.member}> has claimed a donation: ${doc.id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
-                                msg.react('<:yes:776488521090465804>')
-                                    .then(() => msg.react('<:no:776488521414344815>'));
-                            }).catch(console.error);
+                            displayData.location = tmp.location;
+                            if (tmp.type == donationType.story) {
+                                displayData.helpers = tmp.helpers;
+                                channel.send(`<@&791340711445921812>, <@${tmp.member}> has claimed a donation: ${doc.id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\` \nHelpers: ${tmp.helpers}\nEnsure each helper shows separately in the JSON above.`).then((msg:any) => {
+                                    msg.react('<:yes:776488521090465804>')
+                                        .then(() => msg.react('<:no:776488521414344815>'));
+                                });
+                            } else {
+                                channel.send(`<@&791340711445921812>, <@${tmp.member}> has claimed a donation: ${doc.id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
+                                    msg.react('<:yes:776488521090465804>')
+                                        .then(() => msg.react('<:no:776488521414344815>'));
+                                });
+                            }
                         }
                     });
                 }).catch(console.error);
