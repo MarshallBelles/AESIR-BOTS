@@ -304,7 +304,12 @@ client.on('message', (message: any) => {
 });
 
 const saveContribution = (credit_amt:any, member:string, type:donationType, name?:string, location?:string, amount?:any, helpers?:string[], helperCredit?:number) => {
-    const claim:Claim = <Claim>{amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now(), helpers, helper_credit: helperCredit};
+    let claim:any;
+    if (helperCredit && helpers) {
+        claim = {amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now(), helpers, helper_credit: helperCredit};
+    } else {
+        claim = {amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now()};
+    }
     const id = admin.firestore().collection('data/industry-bot/claims').doc().id;
     admin.firestore().doc(`data/industry-bot/claims/${id}`).set(claim).then(() => {
         client.channels.fetch(confMaster.admin_channel).then((channel:any) => {
