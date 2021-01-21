@@ -493,7 +493,7 @@ const checkBalance = (member:string, message:any) => {
                                 // we have more than 0 helpers.
                                 const credit = cl.helper_credit / cl.helpers.length;
                                 cl.helpers.forEach((hlpr:string) => {
-                                    process_arr.push(grantHelperCredit(hlpr, credit));
+                                    grantHelperCredit(hlpr, credit);
                                 });
                             }
                         }

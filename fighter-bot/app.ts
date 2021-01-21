@@ -222,7 +222,7 @@ client.on('message', (message: any) => {
             break;
             case "for":
                 if (parts[1] == 'patriotism') {
-                    storyMission(message, 36, 8, 1, 8, getHelpers(message, 2), 'For Patriotism');
+                    storyMission(message, 69, 18, 6, 10, getHelpers(message, 2), 'For Patriotism');
                 }
             break;
             case "for":
