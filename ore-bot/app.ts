@@ -76,7 +76,6 @@ let confMaster: ConfigurationMaster;
 
 client.once('ready', () => {
     console.log('Ready!');
-    // grab configuration from FireBase
     admin.firestore().doc('configuration/industry-bot').onSnapshot((conf) => {
         console.log('obtained new config');
         if (!conf.data()) return;
@@ -99,7 +98,6 @@ client.once('ready', () => {
         client.channels.fetch(confMaster.admin_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
                 admin.firestore().collection('data/industry-bot/claims').where('approved','==',false).where('rejected','==',false).get().then(clms => {
-                    // these claims were not processed before restarting the server
                     clms.docs.forEach(doc => {
                         const tmp = <Claim>doc.data()
                         if (tmp) {
@@ -453,10 +451,8 @@ const grantHelperCredit = (helper: string, credit:number): Promise<any> => {
     return admin.firestore().doc(`data/industry-bot/members/${hlp}`).get().then(doc => {
         if (!doc.exists) {
             let mem = <Member>{credits: 0, officer: false, pack_member: false, direwolf: false, confirmed_dmr: credit, confirmed_ore: 0};
-            // this is a new user that is getting credit
             admin.firestore().doc(`data/industry-bot/members/${hlp}`).set(mem).catch(console.error);
         } else {
-            // existing user is getting the credit
             let mem = <Member>doc.data();
             mem.confirmed_dmr += credit;
             doc.ref.set(mem).catch(console.error);
@@ -490,7 +486,6 @@ const checkBalance = (member:string, message:any) => {
                         }
                         if (cl.helpers && cl.helper_credit) {
                             if (cl.helpers.length > 0) {
-                                // we have more than 0 helpers.
                                 const credit = cl.helper_credit / cl.helpers.length;
                                 cl.helpers.forEach((hlpr:string) => {
                                     grantHelperCredit(hlpr, credit);
@@ -503,36 +498,28 @@ const checkBalance = (member:string, message:any) => {
                         mem.confirmed_ore += totalOre;
                         mem.confirmed_dmr += totalDMR;
                         if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")){
-                            //4000 ore hold
                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 6000)) {
-                                // add to credits
                                 mem.credits += 1;
                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 6000);
                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
                             }
                         } else
                         if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")){
-                            //6000
                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 9000)) {
-                                // add to credits
                                 mem.credits += 1;
                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 9000);
                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
                             }
                         } else
                         if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")){
-                            //9000
                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 26500)) {
-                                // add to credits
                                 mem.credits += 1;
                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 26500);
                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
                             }
                         } else
                         if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")){
-                            //25000
                             while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 42000)) {
-                                // add to credits
                                 mem.credits += 1;
                                 mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 42000);
                                 mem.confirmed_ore = Math.round(mem.confirmed_ore);
@@ -542,7 +529,6 @@ const checkBalance = (member:string, message:any) => {
                         }
                         if (mem.confirmed_dmr > confMaster.dmr_per_credit) {
                             while (mem.confirmed_dmr > confMaster.dmr_per_credit) {
-                                // add to credits
                                 mem.credits += 1;
                                 mem.confirmed_dmr -= confMaster.dmr_per_credit;
                                 mem.confirmed_dmr = Math.round(mem.confirmed_dmr);
