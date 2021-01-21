@@ -345,25 +345,26 @@ const getHelpers = (message:any, startingIndex:number):string[] => {
 
 const storyMission = (message:any, t1:number, t2:number, t3:number, h:number, helpers:string[], name:string) => {
     if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")) {
-        saveContribution(t1, message, donationType.story, name, 'N/A', 1, helpers, h);
+        saveContribution(t1, message.member.id, donationType.story, name, 'N/A', 1, helpers, h);
         message.channel.send(`Thank you <@${message.member.id}> for tracking your story mission run of ${name}! You and any helpers should receive fighter credit within a day.`);
     } else
     if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")) {
-        saveContribution(t2, message, donationType.story, name, 'N/A', 1, helpers, h);
+        saveContribution(t2, message.member.id, donationType.story, name, 'N/A', 1, helpers, h);
         message.channel.send(`Thank you <@${message.member.id}> for tracking your story mission run of ${name}! You and any helpers should receive fighter credit within a day.`);
     } else
     if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")) {
-        saveContribution(t3, message, donationType.story, name, 'N/A', 1, helpers, h);
+        saveContribution(t3, message.member.id, donationType.story, name, 'N/A', 1, helpers, h);
         message.channel.send(`Thank you <@${message.member.id}> for tracking your story mission run of ${name}! You and any helpers should receive fighter credit within a day.`);
     }
 }
 
 const grantHelperCredit = (helper: string, credit:number): Promise<any> => {
-    return admin.firestore().doc(`data/industry-bot/members/${helper}`).get().then(doc => {
+    const hlp = helper.replace(/</g, '').replace(/@/g, '').replace(/!/g, '').replace(/>/g, '');
+    return admin.firestore().doc(`data/industry-bot/members/${hlp}`).get().then(doc => {
         if (!doc.exists) {
             let mem = <Member>{credits: 0, officer: false, pack_member: false, direwolf: false, confirmed_dmr: credit, confirmed_ore: 0};
             // this is a new user that is getting credit
-            admin.firestore().doc(`data/industry-bot/members/${helper}`).set(mem).catch(console.error);
+            admin.firestore().doc(`data/industry-bot/members/${hlp}`).set(mem).catch(console.error);
         } else {
             // existing user is getting the credit
             let mem = <Member>doc.data();
