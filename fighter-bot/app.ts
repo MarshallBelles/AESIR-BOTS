@@ -83,7 +83,7 @@ client.once('ready', () => {
         confMaster = <ConfigurationMaster><any>conf.data();
         client.channels.fetch(confMaster.fighter_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
-                channel.send(`Track your fighter contributions here: \`\`\`H | Help - Expanded help menu \nDebris 200 Clarelam - Claim ship debris contribution for credit at Clarelam \nModules 20 mk5 Misaba - Claim module contribution credit at Misaba \nB | Balance - Display your industry system credit balance \`\`\``);
+                channel.send(`Track your fighter contributions here: \`\`\`H | Help - Expanded help menu \nDebris 200 Clarelam - Claim ship debris contribution for credit at Clarelam \nModules 20 mk5 Misaba - Claim module contribution credit at Misaba \nSuper Soft Drink @mention - Report a run of Super Soft Drink where @mention helped you run it. (additional helpers must be separated by spaces) \nB | Balance - Display your industry system credit balance \`\`\``);
             }).catch(console.error);
         }).catch(console.error);
     });
@@ -315,14 +315,19 @@ const saveContribution = (credit_amt:any, member:string, type:donationType, name
             } else {
                 displayData.amount = claim.amount;
             }
+            displayData.location = claim.location;
             if (type == donationType.story) {
                 displayData.helpers = helpers;
+                channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\` \nHelpers: ${helpers}\nEnsure each helper shows separately in the JSON above.`).then((msg:any) => {
+                    msg.react('<:yes:776488521090465804>')
+                        .then(() => msg.react('<:no:776488521414344815>'));
+                });
+            } else {
+                channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
+                    msg.react('<:yes:776488521090465804>')
+                        .then(() => msg.react('<:no:776488521414344815>'));
+                });
             }
-            displayData.location = claim.location;
-            channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
-                msg.react('<:yes:776488521090465804>')
-                    .then(() => msg.react('<:no:776488521414344815>'));
-            });
         }).catch(console.error);
     }).catch(console.error);
     admin.firestore().doc(`data/industry-bot/members/${member}`).get().then(doc => {

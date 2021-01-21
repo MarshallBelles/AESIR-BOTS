@@ -83,7 +83,7 @@ client.once('ready', () => {
         confMaster = <ConfigurationMaster><any>conf.data();
         client.channels.fetch(confMaster.main_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
-                channel.send(`Track your ore contributions here: \`\`\`H | Help - Expanded help menu \nSpodumain 85000.3 m3 Misaba - Claim spodumain ore contribution for credit at Misaba \nB | Balance - Display your industry system credit balance \`\`\``);
+                channel.send(`Track your ore contributions here: \`\`\`H | Help - Expanded help menu \nPlanetary 1500 Misaba - Claim credit for planetary materials donation (enter unit count, not m3 value) \nSpodumain 85000.3 m3 Misaba - Claim spodumain ore contribution for credit at Misaba \nB | Balance - Display your industry system credit balance \`\`\``);
             }).catch(console.error);
         }).catch(console.error);
         client.channels.fetch(confMaster.tech_level_channel).then((channel:any) => {
@@ -405,7 +405,7 @@ client.on('message', (message: any) => {
 });
 
 const saveContribution = (credit_amt:any, member:string, type:donationType, name?:string, location?:string, amount?:any, helpers?:string[], helperCredit?:number) => {
-    const claim:Claim = <Claim>{amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now()};
+    const claim:Claim = <Claim>{amount:parseFloat(credit_amt), member, type, name, location, approved: false, rejected: false, credited: false, timestamp: Date.now(), helpers, helper_credit: helperCredit};
     const id = admin.firestore().collection('data/industry-bot/claims').doc().id;
     admin.firestore().doc(`data/industry-bot/claims/${id}`).set(claim).then(() => {
         client.channels.fetch(confMaster.admin_channel).then((channel:any) => {
@@ -416,14 +416,19 @@ const saveContribution = (credit_amt:any, member:string, type:donationType, name
             } else {
                 displayData.amount = claim.amount;
             }
+            displayData.location = claim.location;
             if (type == donationType.story) {
                 displayData.helpers = helpers;
+                channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\` \nHelpers: ${helpers}\nEnsure each helper shows separately in the JSON above.`).then((msg:any) => {
+                    msg.react('<:yes:776488521090465804>')
+                        .then(() => msg.react('<:no:776488521414344815>'));
+                });
+            } else {
+                channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
+                    msg.react('<:yes:776488521090465804>')
+                        .then(() => msg.react('<:no:776488521414344815>'));
+                });
             }
-            displayData.location = claim.location;
-            channel.send(`<@&791340711445921812>, <@${member}> has claimed a donation: ${id} \n \`\`\`JS\n ${JSON.stringify(displayData, null, 4)} \`\`\``).then((msg:any) => {
-                msg.react('<:yes:776488521090465804>')
-                    .then(() => msg.react('<:no:776488521414344815>'));
-            });
         }).catch(console.error);
     }).catch(console.error);
     admin.firestore().doc(`data/industry-bot/members/${member}`).get().then(doc => {
@@ -435,11 +440,12 @@ const saveContribution = (credit_amt:any, member:string, type:donationType, name
 }
 
 const grantHelperCredit = (helper: string, credit:number): Promise<any> => {
-    return admin.firestore().doc(`data/industry-bot/members/${helper}`).get().then(doc => {
+    const hlp = helper.replace(/</g, '').replace(/@/g, '').replace(/!/g, '').replace(/>/g, '');
+    return admin.firestore().doc(`data/industry-bot/members/${hlp}`).get().then(doc => {
         if (!doc.exists) {
             let mem = <Member>{credits: 0, officer: false, pack_member: false, direwolf: false, confirmed_dmr: credit, confirmed_ore: 0};
             // this is a new user that is getting credit
-            admin.firestore().doc(`data/industry-bot/members/${helper}`).set(mem).catch(console.error);
+            admin.firestore().doc(`data/industry-bot/members/${hlp}`).set(mem).catch(console.error);
         } else {
             // existing user is getting the credit
             let mem = <Member>doc.data();
