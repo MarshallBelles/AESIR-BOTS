@@ -25,7 +25,7 @@ rm -rf /opt/bots/production/ore-bot;
 mkdir /opt/bots/production/ore-bot;
 mkdir build;
 mv ./app.js build;
-cp build/app.js /opt/bots/production/ore-bot/inb.js;
+cp build/app.js /opt/bots/production/ore-bot/obt.js;
 cp package.json /opt/bots/production/ore-bot/package.json;
 cp package-lock.json /opt/bots/production/ore-bot/package-lock.json;
 cd ..;
@@ -39,7 +39,7 @@ rm -rf /opt/bots/production/fighter-bot;
 mkdir /opt/bots/production/fighter-bot;
 mkdir build;
 mv ./app.js build;
-cp build/app.js /opt/bots/production/fighter-bot/inb.js;
+cp build/app.js /opt/bots/production/fighter-bot/fbt.js;
 cp package.json /opt/bots/production/fighter-bot/package.json;
 cp package-lock.json /opt/bots/production/fighter-bot/package-lock.json;
 cd ..;
@@ -53,7 +53,7 @@ rm -rf /opt/bots/production/orders-bot;
 mkdir /opt/bots/production/orders-bot;
 mkdir build;
 mv ./app.js build;
-cp build/app.js /opt/bots/production/orders-bot/inb.js;
+cp build/app.js /opt/bots/production/orders-bot/ord.js;
 cp package.json /opt/bots/production/orders-bot/package.json;
 cp package-lock.json /opt/bots/production/orders-bot/package-lock.json;
 
@@ -62,10 +62,10 @@ npm i;
 nohup node awp.js &
 cd ../ore-bot;
 npm i;
-nohup node inb.js &
+nohup node obt.js &
 cd ../orders-bot;
 npm i;
-nohup node inb.js &
+nohup node ord.js &
 cd ../fighter-bot;
 npm i;
-nohup node inb.js &
+nohup node fbt.js &

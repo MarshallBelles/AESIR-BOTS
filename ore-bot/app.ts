@@ -57,7 +57,8 @@ interface Member {
     pack_member: boolean,
     direwolf: boolean,
     confirmed_ore: number,
-    confirmed_dmr: number
+    confirmed_dmr: number,
+    name?: string
 }
 
 enum donationType {
@@ -71,7 +72,9 @@ enum donationType {
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const axios = require('axios');
+const Table = require('table')
+const Tbl = Table.table;
+
 let confMaster: ConfigurationMaster;
 
 client.once('ready', () => {
@@ -174,18 +177,102 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     }
 });
 
-client.on('message', (message: any) => {
+client.on('message', async (message: any) => {
     var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
     if (message.channel.id == confMaster.admin_channel) {
         switch (parts[0]) {
             case "!admin":
                 switch (parts[1]) {
-                    case "new":
-                        if (parts[2] == "month") {
-                            // For each member, check donations over the past month
-
-                            message.channel.send('Not implemented yet');
-                        }
+                    case "update":
+                        message.channel.send('Please allow up to 5 minutes for dashboard calculation');
+                        message.guild.members.cache.array().forEach((guildMem:any) => {
+                            admin.firestore().doc(`data/industry-bot/members/${guildMem.id}`).get().then((doc) => {
+                                if (doc.exists) {
+                                    admin.firestore().collection('data/industry-bot/claims').where('member', '==', guildMem.id).where('approved','==',true).where('credited','==',false).get().then(clms => {
+                                        if(clms.docs.length > 0) {
+                                            let process_arr = [];
+                                            let totalOre = 0;
+                                            let totalDMR = 0;
+                                            clms.docs.forEach(clm => {
+                                                let cl = <Claim>clm.data();
+                                                if (cl.type == donationType.ore) {
+                                                    totalOre += cl.amount;
+                                                    cl.credited = true;
+                                                    process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+                                                } else if (cl.type == donationType.isk) {
+                                                    cl.credited = true;
+                                                    process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+                                                } else {
+                                                    totalDMR += cl.amount;
+                                                    cl.credited = true;
+                                                    process_arr.push(admin.firestore().doc(`data/industry-bot/claims/${clm.id}`).set(cl));
+                                                }
+                                                if (cl.helpers && cl.helper_credit) {
+                                                    if (cl.helpers.length > 0) {
+                                                        const credit = cl.helper_credit / cl.helpers.length;
+                                                        cl.helpers.forEach((hlpr:string) => {
+                                                            grantHelperCredit(hlpr, credit);
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                            let mem = <Member>doc.data();
+                                            if (mem) {
+                                                mem.confirmed_ore += totalOre;
+                                                mem.confirmed_dmr += totalDMR;
+                                                if(message.member.roles.cache.find((r:any) => r.name === "T3/T4")){
+                                                    while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 6000)) {
+                                                        mem.credits += 1;
+                                                        mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 6000);
+                                                        mem.confirmed_ore = Math.round(mem.confirmed_ore);
+                                                    }
+                                                } else
+                                                if(message.member.roles.cache.find((r:any) => r.name === "T5/T6")){
+                                                    while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 9000)) {
+                                                        mem.credits += 1;
+                                                        mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 9000);
+                                                        mem.confirmed_ore = Math.round(mem.confirmed_ore);
+                                                    }
+                                                } else
+                                                if(message.member.roles.cache.find((r:any) => r.name === "T7/T8")){
+                                                    while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 26500)) {
+                                                        mem.credits += 1;
+                                                        mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 26500);
+                                                        mem.confirmed_ore = Math.round(mem.confirmed_ore);
+                                                    }
+                                                } else
+                                                if(message.member.roles.cache.find((r:any) => r.name === "T9/T10")){
+                                                    while (mem.confirmed_ore > (confMaster.ore_holds_per_credit * 42000)) {
+                                                        mem.credits += 1;
+                                                        mem.confirmed_ore -= (confMaster.ore_holds_per_credit * 42000);
+                                                        mem.confirmed_ore = Math.round(mem.confirmed_ore);
+                                                    }
+                                                } else {
+                                                    // notify admin that a role is not assigned
+                                                }
+                                                if (mem.confirmed_dmr > confMaster.dmr_per_credit) {
+                                                    while (mem.confirmed_dmr > confMaster.dmr_per_credit) {
+                                                        mem.credits += 1;
+                                                        mem.confirmed_dmr -= confMaster.dmr_per_credit;
+                                                        mem.confirmed_dmr = Math.round(mem.confirmed_dmr);
+                                                    }
+                                                }
+                                                mem.name = guildMem.displayName;
+                                                process_arr.push(doc.ref.set(mem));
+                                            }
+                                            Promise.all(process_arr).catch(console.error);
+                                        }
+                                    }).catch(console.error);
+                                }
+                            });
+                        })
+                    break;
+                    case "purge":
+                        admin.firestore().collection(`data/industry-bot/members`).where('credits', '==', 0).where('confirmed_ore', '==', 0).where('confirmed_dmr', '==', 0).get().then(docs => {
+                            docs.forEach(doc => {
+                                doc.ref.delete();
+                            })
+                        });
                     break;
                     case "grant":
                         if (parts[2] == "credit") {
@@ -204,15 +291,78 @@ client.on('message', (message: any) => {
                             }
                         }
                     break;
+                    case "credits":
+                        admin.firestore().collection('data/industry-bot/members').where('credits', '>=', 1).get().then(mems => {
+                            // prepare dashboard table
+                            let table:Array<any> = [];
+                            
+                            mems.docs.forEach((mem) => {
+                                const memb = <Member>mem.data();
+                                let status: string;
+                                if (memb.officer) {
+                                    status = 'Officer';
+                                } else if (memb.direwolf) {
+                                    status = 'Direwolf';
+                                } else if (memb.pack_member) {
+                                    status = 'Pack Member';
+                                } else {
+                                    status = 'Wolf Pup'
+                                }
+                                const user = message.guild.members.cache.get(mem.id);
+                                let TL = '';
+                                if(user) {
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {TL = '3/4'} else
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {TL = '5/6'} else
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T7/T8")) {TL = '7/8'} else
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T9/T10")) {TL = '9/10'} 
+                                    table.push([user.displayName, memb.credits, Math.round(memb.confirmed_dmr), Math.round(memb.confirmed_ore), TL, status]);
+                                }
+                            });
+                            const count = Math.ceil(table.length / 10); // number of iterations
+                            for (let index = 0; index < count; index++) {
+                                let msg = table.splice(0, 10);
+                                msg.unshift(['Name', 'Credits', 'FP', 'Ore', 'TL', 'Status']);
+                                message.channel.send(`\`\`\`asciidoc\n${Tbl(msg)}\`\`\``);
+                            }
+                        });
+                    break;
                     case "dashboard":
                         admin.firestore().collection('data/industry-bot/members').get().then(mems => {
+                            // prepare dashboard table
+                            let table:Array<any> = [];
+                            
                             mems.docs.forEach((mem) => {
-                                checkBalance(mem.id, message);
+                                const memb = <Member>mem.data();
+                                let status: string;
+                                if (memb.officer) {
+                                    status = 'Officer';
+                                } else if (memb.direwolf) {
+                                    status = 'Direwolf';
+                                } else if (memb.pack_member) {
+                                    status = 'Pack Member';
+                                } else {
+                                    status = 'Wolf Pup'
+                                }
+                                const user = message.guild.members.cache.get(mem.id);
+                                let TL = '';
+                                if(user) {
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {TL = '3/4'} else
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {TL = '5/6'} else
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T7/T8")) {TL = '7/8'} else
+                                    if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T9/T10")) {TL = '9/10'} 
+                                    table.push([user.displayName, memb.credits, Math.round(memb.confirmed_dmr), Math.round(memb.confirmed_ore), TL, status]);
+                                }
                             });
+                            const count = Math.ceil(table.length / 10); // number of iterations
+                            for (let index = 0; index < count; index++) {
+                                let msg = table.splice(0, 10);
+                                msg.unshift(['Name', 'Credits', 'FP', 'Ore', 'TL', 'Status']);
+                                message.channel.send(`\`\`\`asciidoc\n${Tbl(msg)}\`\`\``);
+                            }
                         });
                     break;
                     default:
-                        message.channel.send('usage: \n * !admin new month - execute monthly \n * !admin grant credit [number] @mention - grant @mention [number] credits \n * !admin dashboard - show all members, their industry balances, and their pack status.')
+                        message.channel.send('usage: \n * !admin update - update dashboard \n * !admin grant credit [number] @mention - grant @mention [number] credits \n * !admin credits - show just members who have industry credit\n * !admin dashboard - show all members, their industry balances, and their pack status. ')
                     break;
                 }
             break;
@@ -463,7 +613,7 @@ const grantHelperCredit = (helper: string, credit:number): Promise<any> => {
 const checkBalance = (member:string, message:any) => {
     admin.firestore().doc(`data/industry-bot/members/${member}`).get().then(doc => {
         if (!doc.exists) {
-            message.channel.send(`<@${member}>, you have not participated in the industry program. Please track your contributions and then try again.`)
+            message.channel.send(`<@${member}>, your current industry balance is 0 credit(s) \n \`\`\` Confirmed Ore: 0 m3 \n Fighter Points: 0 \`\`\``);
         } else {
             admin.firestore().collection('data/industry-bot/claims').where('member', '==', member).where('approved','==',true).where('credited','==',false).get().then(clms => {
                 if(clms.docs.length > 0) {
