@@ -144,7 +144,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
                 declineContribution(message, user);
             }
         }
-        if (message.channel.id == confMaster.tech_level_channel) {
+        if (message.channel.id === confMaster.tech_level_channel) {
             if(emoji.name == "T3T4") {
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {message.channel.send(`<@${user.id}> you are already tagged with T3/T4`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {message.channel.send(`<@${user.id}> you are already tagged T5/T6, you cannot be moved to T3/T4`)} else
@@ -179,7 +179,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
 
 client.on('message', async (message: any) => {
     var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
-    if (message.channel.id == confMaster.admin_channel) {
+    if (message.channel.id === confMaster.admin_channel) {
         switch (parts[0]) {
             case "!admin":
                 switch (parts[1]) {
