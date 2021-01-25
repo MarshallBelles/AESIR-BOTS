@@ -95,7 +95,6 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
         }
         if(emoji.name === "🤝") {
             message.guild.member(user).roles.add('776841070419247104').catch(console.error);
-            message.reactions.resolve("🤝").users.remove(user.id);
             message.channel.send(`Welcome <@${user.id}>! Please see <#780453159544815689>`).then((msg:any) => {msg.delete({ timeout: 300000 })}).then(() => {message.reactions.resolve("🤝").users.remove(user.id);});
         }
     }

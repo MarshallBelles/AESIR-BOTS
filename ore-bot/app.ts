@@ -146,7 +146,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
         }
         if (message.channel.id === confMaster.tech_level_channel) {
             if(emoji.name == "T3T4") {
-                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {message.channel.send(`<@${user.id}> you are already tagged with T3/T4`)} else
+                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {message.channel.send(`<@${user.id}> you are tagged with T3/T4`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {message.channel.send(`<@${user.id}> you are already tagged T5/T6, you cannot be moved to T3/T4`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T7/T8")) {message.channel.send(`<@${user.id}> you are currently tagged T7/T8, you cannot be moved to T3/T4`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T9/T10")) {message.channel.send(`<@${user.id}> you are currently tagged T9/T10, you cannot be moved to T3/T4`)} else
@@ -154,7 +154,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
             }
             if(emoji.name == "T5T6") {
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {message.channel.send(`<@${user.id}> you are now tagged with T5/T6`);message.guild.member(user).roles.remove('796127725000851476');message.guild.member(user).roles.add('796127791467986956');upgradeIndustryCredits('T3T4','T5T6')} else
-                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {message.channel.send(`<@${user.id}> you are already tagged T5/T6`)} else
+                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {message.channel.send(`<@${user.id}> you are tagged T5/T6`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T7/T8")) {message.channel.send(`<@${user.id}> you are already tagged with T7/T8, you cannot be moved to T5/T6`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T9/T10")) {message.channel.send(`<@${user.id}> you are already tagged with T9/T10, you cannot be moved to T5/T6`)} else
                 {message.channel.send(`<@${user.id}> you are now tagged T5/T6`);message.guild.member(user).roles.add('796127791467986956');}
@@ -162,7 +162,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
             if(emoji.name == "T7T8") {
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {message.channel.send(`<@${user.id}> you cannot be tagged with T7/T8 as you are currently T3/T4. Upgrade to T5/T6 first.`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {message.channel.send(`<@${user.id}> you are now tagged T7/T8`);message.guild.member(user).roles.remove('796127791467986956');message.guild.member(user).roles.add('796127835328610325');upgradeIndustryCredits('T5T6','T7T8')} else
-                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T7/T8")) {message.channel.send(`<@${user.id}> You are already tagged with T7/T8`)} else
+                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T7/T8")) {message.channel.send(`<@${user.id}> You are tagged with T7/T8`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T9/T10")) {message.channel.send(`<@${user.id}> you are already tagged with T9/T10, you cannot be moved to T7/T8`)} else
                 {message.channel.send(`<@${user.id}> you are now tagged T7/T8`);message.guild.member(user).roles.add('796127835328610325');}
             }
@@ -170,7 +170,7 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T3/T4")) {message.channel.send(`<@${user.id}> you cannot be tagged with T9/T10 as you are currently T3/T4. Upgrade to T5/T6 first.`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T5/T6")) {message.channel.send(`<@${user.id}> you cannot be tagged with T9/T10 as you are currently T5/T6. Upgrade to T7/T8 first.`)} else
                 if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T7/T8")) {message.channel.send(`<@${user.id}> You are now tagged T9/T10`);message.guild.member(user).roles.remove('796127835328610325');message.guild.member(user).roles.add('796127898024673320');upgradeIndustryCredits('T7T8','T9T10')} else
-                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T9/T10")) {message.channel.send(`<@${user.id}> you are already tagged with T9/T10`)} else
+                if(message.guild.member(user).roles.cache.find((r:any) => r.name === "T9/T10")) {message.channel.send(`<@${user.id}> you are tagged with T9/T10`)} else
                 {message.channel.send(`<@${user.id}> you are now tagged T9/T10`);message.guild.member(user).roles.add('796127898024673320');}
             }
         }

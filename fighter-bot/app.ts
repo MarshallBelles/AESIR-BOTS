@@ -57,7 +57,8 @@ interface Member {
     pack_member: boolean,
     direwolf: boolean,
     confirmed_ore: number,
-    confirmed_dmr: number
+    confirmed_dmr: number,
+    name?: string
 }
 
 enum donationType {
