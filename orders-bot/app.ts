@@ -43,14 +43,80 @@ interface Member {
     pack_member: boolean,
     direwolf: boolean,
     confirmed_ore: number,
-    confirmed_dmr: number
+    confirmed_dmr: number,
+    name?: string
 }
 
 
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const axios = require('axios');
+const { Client, MessageEmbed } = require('discord.js');
+const client = new Client();
+const csv = require('csv-parser');
+const fs = require('fs');
 let confMaster: ConfigurationMaster;
+
+class viewManager {
+    allViews: viewer[];
+    constructor() {
+        this.allViews = [];
+    }
+    addView = (newView:viewer, msgContext:any): void => {
+        newView.msgContext = msgContext;
+        this.allViews.push(newView);
+    }
+    getViewByDMID = (dmid:string): any => {
+        this.allViews.forEach(view => {
+            if (view.discordMsgID == dmid) {
+                return view;
+            }
+        });
+    }
+    removeView = (dmid:string): void => {
+        for (let index = 0; index < this.allViews.length; index++) {
+            const element = this.allViews[index];
+            if (element.discordMsgID == dmid) {
+                // remove this element
+                this.allViews.splice(index, 1);
+            }
+        }
+    }
+}
+
+const VM = new viewManager();
+
+class viewer {
+    discordMsgID: string;
+    lastUsed: number;
+    msgContext: any;
+    constructor(dmid: string) {
+        this.discordMsgID = dmid;
+        this.lastUsed = Date.now();
+    }
+    getDMID = (): string => {
+        return this.discordMsgID;
+    }
+    checkLastUsedTime = (): void => {
+        let now = new Date();
+        let expires = new Date(this.lastUsed + 300000);
+        if (now.getTime() > expires.getTime()) {
+            // this view has not been used in over 5 minutes
+            this.disposeView();
+        }
+    }
+    disposeView = (): void => {
+        this.msgContext.delete();
+        VM.removeView(this.discordMsgID);
+    }
+}
+
+class priceViewer extends viewer {
+    constructor(dmid: string) {super(dmid)}
+    getPrice = (): any => {
+        this.lastUsed = Date.now();
+    }
+    nextPage = (): any => {
+        this.lastUsed = Date.now();
+    }
+}
 
 client.once('ready', () => {
     console.log('Ready!');
@@ -64,6 +130,15 @@ client.once('ready', () => {
                 channel.send(`Industry Orders Bot`);
             }).catch(console.error);
         }).catch(console.error);
+    });
+    // read our csv with the ship prices
+    const results:any[] = [];
+
+    fs.createReadStream('prices.csv')
+    .pipe(csv())
+    .on('data', (data:any) => results.push(data))
+    .on('end', () => {
+        console.log(results);
     });
 });
 
@@ -81,8 +156,26 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
 });
 
 client.on('message', (message: any) => {
-    var parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
-    if (message.channel.id == confMaster.admin_channel) {
+    var parts:string[] = message.content.toLowerCase().replace(/,/g, '').split(" ");
+    if (message.author == client.user) {return;}
+    if (message.channel.id == confMaster.orders_channel) {
+        switch (parts[0]) {
+            case "price":
+                if (parts[1]) {
+                    let searchString:string = '';
+                    for (let index = 1; index < parts.length; index++) {
+                        searchString += parts[index];
+                        if (index != parts.length) {
+                            searchString += ' ';
+                        }
+                    }
+                } else {
+                    // get all prices
+                }
+            break;
+            default:
+            break;
+        }
     }
 });
 
