@@ -12,7 +12,10 @@ var serviceAccount = {
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-aiibb%40ee-aesir.iam.gserviceaccount.com"
   }
-  
+
+const numberWithCommas = (x:number):string => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(<any>serviceAccount),
@@ -61,14 +64,17 @@ class viewManager {
     }
     addView = (newView:viewer, msgContext:any): void => {
         newView.msgContext = msgContext;
+        newView.discordMsgID = msgContext.id;
         this.allViews.push(newView);
     }
-    getViewByDMID = (dmid:string): any => {
-        this.allViews.forEach(view => {
-            if (view.discordMsgID == dmid) {
-                return view;
-            }
-        });
+    getViewByDMID = async (dmid:string): Promise<any> => {
+        return new Promise((res) => {
+            this.allViews.forEach(view => {
+                if (view.discordMsgID == dmid) {
+                    return res(view);
+                }
+            });
+        })
     }
     removeView = (dmid:string): void => {
         for (let index = 0; index < this.allViews.length; index++) {
@@ -79,16 +85,18 @@ class viewManager {
             }
         }
     }
+
 }
 
 const VM = new viewManager();
+const prices: any[] = [];
 
 class viewer {
     discordMsgID: string;
     lastUsed: number;
     msgContext: any;
-    constructor(dmid: string) {
-        this.discordMsgID = dmid;
+    constructor() {
+        this.discordMsgID = '';
         this.lastUsed = Date.now();
     }
     getDMID = (): string => {
@@ -109,12 +117,136 @@ class viewer {
 }
 
 class priceViewer extends viewer {
-    constructor(dmid: string) {super(dmid)}
-    getPrice = (): any => {
+    currentIndex:number;
+    maxIndex:number;
+    searchResults:any[];
+    constructor() {super(); this.currentIndex = 0; this.maxIndex = 0; this.searchResults = []}
+    setup = (search?:string): any => {
         this.lastUsed = Date.now();
+        if (search) {
+            for (let index = 0; index < prices.length; index++) {
+                const element = prices[index];
+                const ship:string = element.Ship.toLowerCase();
+                if (ship.includes(search)) {
+                    this.searchResults.push(element);
+                }
+            }
+            if (this.searchResults.length == 0) {
+                return `There were no results searching for: ${search}`;
+            } else {
+                this.maxIndex = this.searchResults.length;
+                const msg = new MessageEmbed()
+                .setTitle('AE13 Ship Pricing')
+                .setColor(0xff0000)
+                .setDescription(this.searchResults[this.currentIndex].Ship)
+                .addFields(
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pup)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pack)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Dire)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Planetary)} ISK\`\`\``}
+                    )
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+            return msg;
+            }
+        } else {
+            this.maxIndex = prices.length;
+            const msg = new MessageEmbed()
+                .setTitle('AE13 Ship Pricing')
+                .setColor(0xff0000)
+                .setDescription(prices[this.currentIndex].Ship)
+                .addFields(
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pup)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pack)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Dire)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Planetary)} ISK\`\`\``}
+                    )
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+            return msg;
+        }
     }
     nextPage = (): any => {
         this.lastUsed = Date.now();
+        if (this.searchResults.length > 0) {
+            this.maxIndex = this.searchResults.length;
+            if (this.currentIndex >= this.maxIndex -1) {
+                return;
+            }
+            this.currentIndex += 1;
+            const msg = new MessageEmbed()
+                .setTitle('AE13 Ship Pricing')
+                .setColor(0xff0000)
+                .setDescription(this.searchResults[this.currentIndex].Ship)
+                .addFields(
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pup)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pack)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Dire)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Planetary)} ISK\`\`\``}
+                    )
+                .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+            this.msgContext.edit(msg);
+        } else {
+            this.maxIndex = prices.length;
+            if (this.currentIndex >= this.maxIndex -1) {
+                return;
+            }
+            this.currentIndex += 1;
+            const msg = new MessageEmbed()
+                .setTitle('AE13 Ship Pricing')
+                .setColor(0xff0000)
+                .setDescription(prices[this.currentIndex].Ship)
+                .addFields(
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pup)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pack)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Dire)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Planetary)} ISK\`\`\``}
+                    )
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+            this.msgContext.edit(msg);
+        }
+        VM.removeView(this.discordMsgID);
+        VM.addView(this, this.msgContext);
+    }
+    previousPage = (): any => {
+        this.lastUsed = Date.now();
+        if (this.searchResults.length > 0) {
+            this.maxIndex = this.searchResults.length;
+            if (this.currentIndex <= 0) {
+                return;
+            }
+            this.currentIndex += -1;
+            const msg = new MessageEmbed()
+                .setTitle('AE13 Ship Pricing')
+                .setColor(0xff0000)
+                .setDescription(this.searchResults[this.currentIndex].Ship)
+                .addFields(
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pup)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pack)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Dire)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Planetary)} ISK\`\`\``}
+                    )
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+            this.msgContext.edit(msg);
+        } else {
+            this.maxIndex = prices.length;
+            if (this.currentIndex <= 0) {
+                return;
+            }
+            this.currentIndex += -1;
+            const msg = new MessageEmbed()
+                .setTitle('AE13 Ship Pricing')
+                .setColor(0xff0000)
+                .setDescription(prices[this.currentIndex].Ship)
+                .addFields(
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pup)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pack)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Dire)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Planetary)} ISK\`\`\``}
+                    )
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+            this.msgContext.edit(msg);
+        }
+        VM.removeView(this.discordMsgID);
+        VM.addView(this, this.msgContext);
     }
 }
 
@@ -132,14 +264,9 @@ client.once('ready', () => {
         }).catch(console.error);
     });
     // read our csv with the ship prices
-    const results:any[] = [];
-
     fs.createReadStream('prices.csv')
     .pipe(csv())
-    .on('data', (data:any) => results.push(data))
-    .on('end', () => {
-        console.log(results);
-    });
+    .on('data', (data:any) => prices.push(data));
 });
 
 client.on('messageReactionAdd', (messageReaction:any, user:any) => {
@@ -147,9 +274,22 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
     if(user.bot)  {return;}
     if (message.author == client.user) {
         if (message.channel.id == confMaster.orders_channel) {
-            if(emoji.name === "yes") {
+            if(emoji.name === "⬅️") {
+                message.reactions.resolve("⬅️").users.remove(user.id);
+                VM.getViewByDMID(message.id).then((dat:any) => {
+                    let dt = Object.assign(new priceViewer(), dat);
+                    dt.previousPage();
+                })
             }
-            if(emoji.name === "no") {
+            if(emoji.name === "🛒") {
+                message.reactions.resolve("🛒").users.remove(user.id);
+            }
+            if(emoji.name === "➡️") {
+                message.reactions.resolve("➡️").users.remove(user.id);
+                VM.getViewByDMID(message.id).then((dat:any) => {
+                    let dt = Object.assign(new priceViewer(), dat);
+                    dt.nextPage();
+                })
             }
         }
     }
@@ -165,18 +305,49 @@ client.on('message', (message: any) => {
                     let searchString:string = '';
                     for (let index = 1; index < parts.length; index++) {
                         searchString += parts[index];
-                        if (index != parts.length) {
+                        if (index != (parts.length - 1)) {
                             searchString += ' ';
                         }
                     }
+                    let viewPanel:priceViewer = new priceViewer();
+                    let msg = viewPanel.setup(searchString);
+                    message.channel.send(msg).then((msg:any) => {
+                        VM.addView(viewPanel, msg);
+                        msg.react('⬅️')
+                        .then(() => {msg.react('🛒')})
+                        .then(() => {msg.react('➡️')})
+                    }).catch(console.error);
+                    message.delete({ timeout: 600000 });
                 } else {
                     // get all prices
+                    let viewPanel:priceViewer = new priceViewer();
+                    let msg = viewPanel.setup();
+                    if (typeof msg === 'string' || msg instanceof String) {
+
+                    }
+                    message.channel.send(msg).then((msg:any) => {
+                        VM.addView(viewPanel, msg);
+                        msg.react('⬅️')
+                        .then(() => {msg.react('🛒')})
+                        .then(() => {msg.react('➡️')})
+                    }).catch(console.error);
+                    message.delete({ timeout: 600000 });
                 }
             break;
+            case "cart":
+            break;
             default:
+                message.channel.send('I don\'t know that command. \nTry: price or cart').then((msg:any) => {msg.delete({ timeout: 600000 })});
+                message.delete({ timeout: 600000 });
             break;
         }
     }
 });
+const cleanup = () => {
+    VM.allViews.forEach(view => {
+        view.checkLastUsedTime();
+    });
+}
 
+setInterval(cleanup, 60000);
 client.login('NzkwODA1MjM0OTI1NDM2OTY4.X-F8xA.qOIAk7mOEjVtg0kjZpE5xbvbP1Q');
