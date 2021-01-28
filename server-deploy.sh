@@ -12,10 +12,13 @@ npm i;
 cd ../ore-bot;
 npm i;
 
-cd ..
-nohup ts-node aesir-wolf-pack/app.ts &
-nohup ts-node fighter-bot/app.ts &
-nohup ts-node orders-bot/app.ts &
-nohup ts-node ore-bot/app.ts &
+cd ../aesir-wolf-pack;
+nohup npm run prod &
+cd ../fighter-bot;
+nohup npm run prod &
+cd ../orders-bot;
+nohup npm run prod &
+cd ../ore-bot;
+nohup npm run prod &
 echo;
-echo "Done!";
+echo "Done!"
