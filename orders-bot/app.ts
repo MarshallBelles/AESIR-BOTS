@@ -138,14 +138,14 @@ class priceViewer extends viewer {
                 const msg = new MessageEmbed()
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
-                .setDescription(this.searchResults[this.currentIndex].Ship)
+                .setDescription(this.searchResults[this.currentIndex].Name)
                 .addFields(
-                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pup)} ISK\`\`\``},
-                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pack)} ISK\`\`\``},
-                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Dire)} ISK\`\`\``},
-                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Planetary)} ISK\`\`\``}
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T1)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T2)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T3)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].pfee)} ISK\`\`\``}
                     )
-                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             return msg;
             }
         } else {
@@ -153,14 +153,14 @@ class priceViewer extends viewer {
             const msg = new MessageEmbed()
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
-                .setDescription(prices[this.currentIndex].Ship)
+                .setDescription(prices[this.currentIndex].Name)
                 .addFields(
-                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pup)} ISK\`\`\``},
-                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pack)} ISK\`\`\``},
-                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Dire)} ISK\`\`\``},
-                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Planetary)} ISK\`\`\``}
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T1)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T2)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T3)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].pfee)} ISK\`\`\``}
                     )
-                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             return msg;
         }
     }
@@ -175,14 +175,14 @@ class priceViewer extends viewer {
             const msg = new MessageEmbed()
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
-                .setDescription(this.searchResults[this.currentIndex].Ship)
+                .setDescription(this.searchResults[this.currentIndex].Name)
                 .addFields(
-                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pup)} ISK\`\`\``},
-                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pack)} ISK\`\`\``},
-                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Dire)} ISK\`\`\``},
-                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Planetary)} ISK\`\`\``}
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T1)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T2)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T3)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].pfee)} ISK\`\`\``}
                     )
-                .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+                .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         } else {
             this.maxIndex = prices.length;
@@ -193,14 +193,14 @@ class priceViewer extends viewer {
             const msg = new MessageEmbed()
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
-                .setDescription(prices[this.currentIndex].Ship)
+                .setDescription(prices[this.currentIndex].Name)
                 .addFields(
-                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pup)} ISK\`\`\``},
-                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pack)} ISK\`\`\``},
-                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Dire)} ISK\`\`\``},
-                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Planetary)} ISK\`\`\``}
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T1)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T2)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T3)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].pfee)} ISK\`\`\``}
                     )
-                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         }
         VM.removeView(this.discordMsgID);
@@ -217,14 +217,14 @@ class priceViewer extends viewer {
             const msg = new MessageEmbed()
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
-                .setDescription(this.searchResults[this.currentIndex].Ship)
+                .setDescription(this.searchResults[this.currentIndex].Name)
                 .addFields(
-                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pup)} ISK\`\`\``},
-                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Pack)} ISK\`\`\``},
-                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Dire)} ISK\`\`\``},
-                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].Planetary)} ISK\`\`\``}
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T1)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T2)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T3)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].pfee)} ISK\`\`\``}
                     )
-                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         } else {
             this.maxIndex = prices.length;
@@ -235,14 +235,14 @@ class priceViewer extends viewer {
             const msg = new MessageEmbed()
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
-                .setDescription(prices[this.currentIndex].Ship)
+                .setDescription(prices[this.currentIndex].Name)
                 .addFields(
-                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pup)} ISK\`\`\``},
-                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Pack)} ISK\`\`\``},
-                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Dire)} ISK\`\`\``},
-                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].Planetary)} ISK\`\`\``}
+                    {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T1)} ISK\`\`\``},
+                    {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T2)} ISK\`\`\``},
+                    {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T3)} ISK\`\`\``},
+                    {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].pfee)} ISK\`\`\``}
                     )
-                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship cost does not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
+                    .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         }
         VM.removeView(this.discordMsgID);
