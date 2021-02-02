@@ -501,6 +501,7 @@ client.on('message', (message: any) => {
                     } else {
                         message.channel.send(dat).then((msg:any) => {
                             VM.addView(viewPanel, msg);
+                            viewPanel.update();
                             msg.react('<:yes:776488521090465804>')
                             .then(() => {msg.react('<:no:776488521414344815>')})
                             .then(() => {msg.react('⬆️')})
