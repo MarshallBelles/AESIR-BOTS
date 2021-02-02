@@ -116,6 +116,131 @@ class viewer {
     }
 }
 
+class cartViewer extends viewer {
+    cartContents:any[];
+    usingCredits:number;
+    creditBalance: number;
+    userName: string;
+    member: any;
+    snapListener:any;
+    pFee:boolean;
+    constructor(username:string, member:any) {super(); this.cartContents = []; this.usingCredits = 0; this.userName = username; this.member = member; this.creditBalance = 0; this.pFee = true;}
+    setup = async (): Promise<any> => {
+        return new Promise((res) => {
+            admin.firestore().collection(`data/industry-bot/members/${this.member.id}/cart`).get().then(col => {
+                if (col.size > 0) {
+                    // we have stuff to show
+                    col.docs.forEach(doc => {
+                        this.cartContents.push(doc);
+                    });
+                    const msg = new MessageEmbed()
+                    .setTitle('AE13 Order Cart - ' + this.member.displayName)
+                    .setColor(0xff0000)
+                    .addFields({name:'Orders',value:'loading...'});
+                    // setup listener here
+                    this.snapListener = admin.firestore().collection(`data/industry-bot/members/${this.member.id}/cart`).onSnapshot(cols => {
+                        admin.firestore().doc(`data/industry-bot/members/${this.member.id}`).get().then(doc => {
+                            let dat = doc.data();
+                            if (dat) {
+                                this.creditBalance = dat.credits;
+                                if (cols.docs.length > 0) {
+                                    this.cartContents = [];
+                                    cols.docs.forEach(cl => {
+                                        this.cartContents.push(cl.data());
+                                    });
+                                    this.update();
+                                } else {
+                                    // remove this view
+                                    VM.removeView(this.discordMsgID);
+                                    this.msgContext.delete();
+                                    this.cleanup();
+                                }
+                                // check planetary contributions to see if we get charged the fee
+                                //
+                                //
+                                //
+                                //
+                                //
+                                //
+                            } else {
+                                // uhm, how did we get here?
+                                // remove this view
+                                VM.removeView(this.discordMsgID);
+                                this.msgContext.delete();
+                                this.cleanup();
+                            }
+                        });
+                    });
+                    res(msg)
+                } else {
+                    res('your cart is empty.')
+                }
+            });
+        });
+    }
+    update = (): void => {
+        // update UI
+        if (this.cartContents.length == 0) {
+            // we shouldn't be here
+            this.msgContext.delete();
+            VM.removeView(this.discordMsgID);
+            return;
+        }
+        let fieldsarr:any[] = [];
+        let list:string = '';
+        let subtotal:number = 0;
+        let cval:number = 20000000;
+        if(this.member.roles.cache.find((r:any) => r.name === "T5/T6")) {cval = 30000000} else
+        if(this.member.roles.cache.find((r:any) => r.name === "T7/T8")) {cval = 85000000} else
+        if(this.member.roles.cache.find((r:any) => r.name === "T9/T10")) {cval = 145000000}
+        this.cartContents.forEach((item:any) => {
+            list += `${item.Name}\n`
+            if(this.member.roles.cache.find((r:any) => r.name === "Pack Wolf")) {subtotal += Number(item.T2.replace(/,/g, ''));} else
+            if(this.member.roles.cache.find((r:any) => r.name === "Dire Wolf")) {subtotal += Number(item.T3.replace(/,/g, ''));} else
+            if(this.member.roles.cache.find((r:any) => r.name === "Alpha Wolf")) {subtotal += Number(item.T3.replace(/,/g, ''));} else
+            {subtotal += Number(item.T1.replace(/,/g, ''));}
+            if(this.pFee) {subtotal += Number(item.pfee.replace(/,/g, ''));}
+        });
+        let creditstr;
+        if ((this.usingCredits * cval) - subtotal > 0) {
+            creditstr = `Using: ${this.usingCredits} of ${this.creditBalance}\nCredit Value: ${numberWithCommas(this.usingCredits * cval)}\nRemaining credit: ${numberWithCommas((this.usingCredits * cval) - subtotal)}`
+        } else {
+            creditstr = `Using: ${this.usingCredits} of ${this.creditBalance}\nCredit Value: ${numberWithCommas(this.usingCredits * cval)}\nAmount due: ${numberWithCommas((this.usingCredits * cval) - subtotal)}`
+        }
+        fieldsarr.push({name:'Credits',value:creditstr});
+        fieldsarr.push({name:'Items',value:list});
+        const msg = new MessageEmbed()
+                .setTitle('AE13 Order Cart - ' + this.member.displayName)
+                .setColor(0xff0000)
+                .addFields(fieldsarr)
+        this.msgContext.edit(msg).catch(console.error);
+        VM.removeView(this.discordMsgID);
+        VM.addView(this, this.msgContext);
+    }
+    increase = (): void => {
+        if (this.usingCredits < this.creditBalance) this.usingCredits += 1;
+        this.update();
+    }
+    decrease = (): void => {
+        if (this.usingCredits > 0) this.usingCredits += -1;
+        this.update();
+    }
+    cleanup = (): void => {
+        this.snapListener();
+        this.disposeView();
+    }
+    approve = (): void => {}
+    cancel = (): void => {
+        this.cleanup();
+        admin.firestore().collection(`data/industry-bot/members/${this.member.id}/cart`).get().then(dat => {
+            dat.docs.forEach(doc => {
+                doc.ref.delete();
+            })
+        })
+        VM.removeView(this.discordMsgID);
+    }
+}
+
 class priceViewer extends viewer {
     currentIndex:number;
     maxIndex:number;
@@ -126,7 +251,7 @@ class priceViewer extends viewer {
         if (search) {
             for (let index = 0; index < prices.length; index++) {
                 const element = prices[index];
-                const ship:string = element.Ship.toLowerCase();
+                const ship:string = element.Name.toLowerCase();
                 if (ship.includes(search)) {
                     this.searchResults.push(element);
                 }
@@ -139,12 +264,12 @@ class priceViewer extends viewer {
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
                 .setDescription(this.searchResults[this.currentIndex].Name)
-                .addFields(
+                .addFields([
                     {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T1)} ISK\`\`\``},
                     {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T2)} ISK\`\`\``},
                     {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T3)} ISK\`\`\``},
                     {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].pfee)} ISK\`\`\``}
-                    )
+                ])
                     .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             return msg;
             }
@@ -154,17 +279,17 @@ class priceViewer extends viewer {
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
                 .setDescription(prices[this.currentIndex].Name)
-                .addFields(
+                .addFields([
                     {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T1)} ISK\`\`\``},
                     {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T2)} ISK\`\`\``},
                     {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T3)} ISK\`\`\``},
                     {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].pfee)} ISK\`\`\``}
-                    )
+                ])
                     .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             return msg;
         }
     }
-    nextPage = (): any => {
+    nextPage = (): void => {
         this.lastUsed = Date.now();
         if (this.searchResults.length > 0) {
             this.maxIndex = this.searchResults.length;
@@ -176,12 +301,12 @@ class priceViewer extends viewer {
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
                 .setDescription(this.searchResults[this.currentIndex].Name)
-                .addFields(
+                .addFields([
                     {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T1)} ISK\`\`\``},
                     {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T2)} ISK\`\`\``},
                     {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T3)} ISK\`\`\``},
                     {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].pfee)} ISK\`\`\``}
-                    )
+                ])
                 .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         } else {
@@ -194,19 +319,19 @@ class priceViewer extends viewer {
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
                 .setDescription(prices[this.currentIndex].Name)
-                .addFields(
+                .addFields([
                     {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T1)} ISK\`\`\``},
                     {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T2)} ISK\`\`\``},
                     {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T3)} ISK\`\`\``},
                     {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].pfee)} ISK\`\`\``}
-                    )
+                ])
                     .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         }
         VM.removeView(this.discordMsgID);
         VM.addView(this, this.msgContext);
     }
-    previousPage = (): any => {
+    previousPage = (): void => {
         this.lastUsed = Date.now();
         if (this.searchResults.length > 0) {
             this.maxIndex = this.searchResults.length;
@@ -218,12 +343,12 @@ class priceViewer extends viewer {
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
                 .setDescription(this.searchResults[this.currentIndex].Name)
-                .addFields(
+                .addFields([
                     {name:"General Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T1)} ISK\`\`\``},
                     {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T2)} ISK\`\`\``},
                     {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].T3)} ISK\`\`\``},
                     {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(this.searchResults[this.currentIndex].pfee)} ISK\`\`\``}
-                    )
+                ])
                     .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         } else {
@@ -236,17 +361,27 @@ class priceViewer extends viewer {
                 .setTitle('AE13 Ship Pricing')
                 .setColor(0xff0000)
                 .setDescription(prices[this.currentIndex].Name)
-                .addFields(
+                .addFields([
                     {name:"General Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T1)} ISK\`\`\``},
                     {name:"Pack Member Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T2)} ISK\`\`\``},
                     {name:"Direwolf Price", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].T3)} ISK\`\`\``},
                     {name:"Planetary Fee", value:`\`\`\` ${numberWithCommas(prices[this.currentIndex].pfee)} ISK\`\`\``}
-                    )
+                ])
                     .setFooter(`Planetary fee is only charged to non-participating members\nFaction ship price may not include BP\nPage ${this.currentIndex +1} of ${this.maxIndex}`);
             this.msgContext.edit(msg);
         }
         VM.removeView(this.discordMsgID);
         VM.addView(this, this.msgContext);
+    }
+    AddToCart = (user:any): string => {
+        this.lastUsed = Date.now();
+        if (this.searchResults.length != 0) {
+            admin.firestore().collection(`data/industry-bot/members/${user.id}/cart`).doc().set(this.searchResults[this.currentIndex]);
+            return 'added ' + this.searchResults[this.currentIndex].Name + ' to the cart.';
+        } else {
+            admin.firestore().collection(`data/industry-bot/members/${user.id}/cart`).doc().set(prices[this.currentIndex]);
+            return 'added ' + prices[this.currentIndex].Name + ' to the cart.';
+        }
     }
 }
 
@@ -259,7 +394,7 @@ client.once('ready', () => {
         confMaster = <ConfigurationMaster><any>conf.data();
         client.channels.fetch(confMaster.orders_channel).then((channel:any) => {
             channel.bulkDelete(100).then(() => {
-                channel.send(`Industry Orders Bot`);
+                channel.send(`Industry Orders Bot\n\`\`\`\nPrice <ship name> - Check internal price on a ship\nCart - View your cart contents \`\`\``);
             }).catch(console.error);
         }).catch(console.error);
     });
@@ -276,19 +411,46 @@ client.on('messageReactionAdd', (messageReaction:any, user:any) => {
         if (message.channel.id == confMaster.orders_channel) {
             if(emoji.name === "⬅️") {
                 message.reactions.resolve("⬅️").users.remove(user.id);
-                VM.getViewByDMID(message.id).then((dat:any) => {
-                    let dt = Object.assign(new priceViewer(), dat);
-                    dt.previousPage();
+                VM.getViewByDMID(message.id).then((dat:priceViewer) => {
+                    dat.previousPage();
                 })
             }
             if(emoji.name === "🛒") {
                 message.reactions.resolve("🛒").users.remove(user.id);
+                VM.getViewByDMID(message.id).then((dat:priceViewer) => {
+                    let retmsg: string = dat.AddToCart(user);
+                    retmsg = `<@${user.id}> ` + retmsg;
+                    message.channel.send(retmsg).then((msg:any) => {msg.delete({ timeout: 10000 })});
+                })
             }
             if(emoji.name === "➡️") {
                 message.reactions.resolve("➡️").users.remove(user.id);
-                VM.getViewByDMID(message.id).then((dat:any) => {
-                    let dt = Object.assign(new priceViewer(), dat);
-                    dt.nextPage();
+                VM.getViewByDMID(message.id).then((dat:priceViewer) => {
+                    dat.nextPage();
+                })
+            }
+            if(emoji.name === "⬆️") {
+                message.reactions.resolve("⬆️").users.remove(user.id);
+                VM.getViewByDMID(message.id).then((dat:cartViewer) => {
+                    dat.increase();
+                })
+            }
+            if(emoji.name === "⬇️") {
+                message.reactions.resolve("⬇️").users.remove(user.id);
+                VM.getViewByDMID(message.id).then((dat:cartViewer) => {
+                    dat.decrease();
+                })
+            }
+            if(emoji.name === "no") {
+                message.reactions.resolve("776488521414344815").users.remove(user.id);
+                VM.getViewByDMID(message.id).then((dat:cartViewer) => {
+                    dat.cancel();
+                })
+            }
+            if(emoji.name === "yes") {
+                message.reactions.resolve("yes").users.remove(user.id);
+                VM.getViewByDMID(message.id).then((dat:cartViewer) => {
+                    dat.approve();
                 })
             }
         }
@@ -322,9 +484,6 @@ client.on('message', (message: any) => {
                     // get all prices
                     let viewPanel:priceViewer = new priceViewer();
                     let msg = viewPanel.setup();
-                    if (typeof msg === 'string' || msg instanceof String) {
-
-                    }
                     message.channel.send(msg).then((msg:any) => {
                         VM.addView(viewPanel, msg);
                         msg.react('⬅️')
@@ -335,6 +494,21 @@ client.on('message', (message: any) => {
                 }
             break;
             case "cart":
+                let viewPanel:cartViewer = new cartViewer(message.author.username, message.member);
+                viewPanel.setup().then(dat => {
+                    if (dat == 'your cart is empty.') {
+                        message.channel.send(`<@${message.author.id}>, ` + dat).then((messg:any) => {messg.delete({ timeout: 15000 })});
+                    } else {
+                        message.channel.send(dat).then((msg:any) => {
+                            VM.addView(viewPanel, msg);
+                            msg.react('<:yes:776488521090465804>')
+                            .then(() => {msg.react('<:no:776488521414344815>')})
+                            .then(() => {msg.react('⬆️')})
+                            .then(() => {msg.react('⬇️')})
+                        }).catch(console.error);
+                    }
+                    message.delete({ timeout: 600000 });
+                });
             break;
             default:
                 message.channel.send('I don\'t know that command. \nTry: price or cart').then((msg:any) => {msg.delete({ timeout: 600000 })});
