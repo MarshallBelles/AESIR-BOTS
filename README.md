@@ -1,3 +1,3 @@
 # AESIR-BOTS
 
-Ensure you read the [introduction of how to use discord.js](https://discord.js.org/#/)
+Ensure you read the [Discord.NET API documentation](https://docs.stillu.cc/api/)
