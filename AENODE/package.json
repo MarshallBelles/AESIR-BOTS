@@ -1,0 +1,17 @@
+{
+  "name": "aenode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "glob": "^7.1.6",
+    "path": "^0.12.7",
+    "pg": "^8.5.1"
+  }
+}
