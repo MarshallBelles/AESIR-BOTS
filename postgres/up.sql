@@ -1,6 +1,6 @@
 --- Our 3 members
 CREATE TYPE member_type AS ENUM ('Pup','Pack','Dire');
-CREATE TYPE claim_type AS ENUM ('Ore','Story','Anomaly','PI');
+CREATE TYPE claim_type AS ENUM ('Ore','Story','Anomaly','Pack','PI');
 CREATE TYPE claim_status AS ENUM ('Pending','Approved','Rejected');
 
 CREATE TABLE IF NOT EXISTS config (
@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS members (
 );
 
 CREATE TABLE IF NOT EXISTS claims (
+    id INT PRIMARY KEY NOT NULL,
     member_id numeric references members(member_id),
     type claim_type NOT NULL,
     amount numeric NOT NULL,
@@ -52,3 +53,9 @@ CREATE TABLE IF NOT EXISTS claims (
     status claim_status NOT NULL,
     name varchar
 );
+
+CREATE SEQUENCE claim_id
+START 1
+INCREMENT 1
+MINVALUE 1
+OWNED BY claims.id;

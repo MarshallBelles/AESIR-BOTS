@@ -9,7 +9,7 @@ services:
       - database:/var/lib/postgresql/data
       - backup:/backup
     ports:
-      - 5555:5432 
+      - 5555:5432
     environment:
       POSTGRES_PASSWORD: "898asa43sdfas9d244ses"
       POSTGRES_DB: "postgres"

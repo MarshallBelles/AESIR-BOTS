@@ -2,13 +2,13 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const events = require('events');
 const eventEmitter = new events.EventEmitter();
+const glob = require( 'glob' );
+const path = require( 'path' );
+const { Pool } = require('pg');
+const db = new Pool({connectionString:'postgresql://postgres:898asa43sdfas9d244ses@localhost:5555/postgres'})
 
-// Setup all commands
-var glob = require( 'glob' );
-path = require( 'path' );
-
-glob.sync( './commands/*.js' ).forEach( ( file ) => {
-  require( path.resolve( file ) ).setup(eventEmitter, client);
+glob.sync( './modules/*.js' ).forEach( ( file ) => {
+  require( path.resolve( file ) ).setup(eventEmitter, client, db);
 });
 
 client.once('ready', () => {
@@ -16,7 +16,6 @@ client.once('ready', () => {
 });
 
 client.on('messageReactionAdd', (messageReaction, user) => {
-  // const { message, emoji } = messageReaction;
   eventEmitter.emit('reaction', messageReaction, user);
 });
 

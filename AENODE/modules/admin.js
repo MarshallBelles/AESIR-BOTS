@@ -1,8 +1,10 @@
 let mClient;
+let database;
 
 // Every js file in the commands directory must export a setup function to work.
-exports.setup = (eventEmitter, client) => {
+exports.setup = (eventEmitter, client, db) => {
   mClient = client
+  database = db;
   eventEmitter.on('ready', adminStart);
   eventEmitter.on('message', adminCommands);
 }
@@ -13,5 +15,5 @@ const adminStart = () => {
 }
 
 const adminCommands = (msg) => {
-
+  const parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
 }
