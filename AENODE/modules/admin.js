@@ -14,6 +14,6 @@ const adminStart = () => {
   // perform admin functions here that need to happen when starting up.
 }
 
-const adminCommands = (msg) => {
+const adminCommands = (message) => {
   const parts = message.content.toLowerCase().replace(/,/g, '').split(" ");
 }

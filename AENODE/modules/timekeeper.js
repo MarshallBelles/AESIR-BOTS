@@ -8,7 +8,7 @@ exports.setup = (eventEmitter, client, db) => {
   eventEmitter.on('ready', tk_start);
 }
 
-const tk_start = () => {
+const tk_start = async () => {
   // perform setup
   config = await database.query('SELECT * FROM config');
   config = config.rows[0];
