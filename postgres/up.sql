@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS claims (
     amount numeric NOT NULL,
     timestamp numeric NOT NULL,
     status claim_status NOT NULL,
-    name varchar
+    name varchar,
+    helpers text[]
 );
 
 CREATE SEQUENCE claim_id
