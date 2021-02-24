@@ -1,6 +1,25 @@
 /* eslint-disable max-nested-callbacks */
 /* eslint-disable brace-style */
 /* eslint-disable no-case-declarations */
+const admin = require('firebase-admin');
+
+const serviceAccount = {
+	'type': 'service_account',
+	'project_id': 'ee-aesir',
+	'private_key_id': 'df4e3d53275b4bd9cf6e7c4f9d47d50ccae75a72',
+	'private_key': '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCu4rTtZjW+05/g\nkUOpi/Qx5h//q4jqPVef09eGMQ9n47B11IK8ArDydGepaiH1FTCV8p7/vuFsnflR\n4fKSJE8Dz8ghGufGFRsWZNcCdb+DbcfsoCbSTZh122rLz9iJfNSIEhJpiv8sWeF+\nnDKiDrHiqBu0muq0xVJV54AYvl4acs99RBiDerzx9JHZ49C7Gbt7KYP/qkQvJ46T\nxOEuKGiEg/yqwBc9kpRbHYlvp7dWgpcaFHWcE4jP52BdFvVgpn64IgnUUNN5Y9D1\nQSaKdl4qOtdkz7krJSKFROC//VzTMMN5rZ+KEZqp7T7TflG4PtvvtfVmGtqehUWI\nRcCxInTDAgMBAAECggEAM6cg8gcgs6J0k5LEDcUY1E4YQF7NGwYQJdQfUXKXDsOo\noDyqelY/JfUsktSWf/kItxkIThf2I6sK8tzN1M0li0Yo4WI9d3tPW09gU8ksTei0\nRlbM8Itbjt/GDLlwRrdYXHId/w8/K73GRKtkpwm5D21AdZjV3ptzJI0x/9zmFWA7\nRY3LQgYxCD72oL7eYXwHfZw7VaJ/Nj9ETZIL6OM39F9/UiSEu33uJMPGTEOTeeF+\nUUJYNvBfC1U2LCjfEGpSS0vdDIkqgYDYhwZFqrg89VFKmcZeXLCLvh8ZsYnWqSrG\nR07Goa5CuAqDlngnV4kAIzTjZ76z+C6DR2WdwBAJ8QKBgQDjuVu3EsMIK39AG2qy\nQ+02N9OqeKFn29seioJiSwxDecgIwqAw545ywqovi5uagf8KUDHJaBPKEyIL/puY\nAV0paCD2JG0vNKv0k8x6utVANxcECpBcWn72H+nTiy6uyT+dq5lJoEjs0k4eRCjz\nwW+bNZ7rXskW6ZWpEig26JF48QKBgQDEmcblZNJoYqiR5fihnKE6xmW9rSBZ6Wv/\n7O0QysX0vAXoSUgPi+85+xZyk2Sgv68ebMF2tW3101z+R3gJGhk+ESyaqw1tXEL5\nJC2KrLIEUWUfAiBOpKLBaZHwoyXEb6rBaK22f/YTuJ4sWcYC6sNhcbMgG1rJvuo1\nhYtavpco8wKBgFiPinJ9EmoH+Hnm76yaLBNMzL1cInEwmFudRC2TwBYxszBs+D1s\noAJTYDoTUhVZfuT04RfRqPiKTlBZ2QrZZPCodUEkU23rTwBTxk7of+x0QDgrH487\nBmsTaC0D0MjarSnVRUzTz+iBtS2iFkcNsCitRruEZjHJ75EL5aXM9l4RAoGAZ3Vl\nLaJ492Wzv9N9m86JKhztvXs14xrrMqrDtmp+8eNgWHT37vZ81c5EadcWxWEaDrC8\nvnOLginQbh++E0wgrIDtMBeD4WED/YgET03CAHO0+zRrO/d3jsC3hCLW5SC+gzlK\n8Rc1r/sfgcdcZHyWhNkIooTCqhhFuBSm2QIjGfECgYEAgz/cDZCx6QZviOMIIF+x\nc2OKk/2EcXqWVlOR9PoNnaXHlsE2VrezBfvTiJ126bxOm0SSFcZpd8zEOxcwV91+\nKd5IsyH0qqaVjkbha67F6xG89Gh7uQEfldkWej6FQLAAj2J5d6Iuc5bmWYWSjkFF\nX8qArJlP5Xcg89qdCo/br2g=\n-----END PRIVATE KEY-----\n',
+	'client_email': 'firebase-adminsdk-aiibb@ee-aesir.iam.gserviceaccount.com',
+	'client_id': '106302809778365646124',
+	'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+	'token_uri': 'https://oauth2.googleapis.com/token',
+	'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
+	'client_x509_cert_url': 'https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-aiibb%40ee-aesir.iam.gserviceaccount.com',
+};
+
+admin.initializeApp({
+	credential: admin.credential.cert(serviceAccount),
+	databaseURL: 'https://ee-aesir.firebaseio.com',
+});
 
 let mClient;
 let database;
@@ -91,8 +110,168 @@ const handleIndyCommands = async (message) => {
 		});
 		message.channel.send(`\`\`\`JS\n ${JSON.stringify(response.rows, null, 4)} \`\`\``);
 		break;
+	case '!clear':
+		await message.channel.bulkDelete(100);
+		let claims = await database.query('SELECT * FROM claims WHERE status = \'Pending\'');
+		claims = claims.rows;
+		claims.forEach(claim => {
+			message.channel.send(`<@&791340711445921812>, <@${claim.member_id}> has claimed a donation: ${claim.id}\n \`\`\`JS\n ${JSON.stringify(claim, null, 2)} \`\`\``).then((msg) => {
+				msg.react('<:yes:776488521090465804>')
+					.then(() => msg.react('<:no:776488521414344815>'));
+			});
+		});
+		break;
+	case '!prune':
+		const date = new Date();
+		const firstDayLastMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+		let del = await database.query('DELETE FROM claims WHERE timestamp < $1::numeric', [firstDayLastMonth.getTime()]);
+		del = del.rows;
+		message.channel.send(`${JSON.stringify(del, null, 4)}`);
+		break;
+	case '!merge':
+		admin.firestore().collection('data/industry-bot/members').get().then(async (col) => {
+			await downloadMembers(col);
+			await deleteCloudMembers(col);
+			await saveMembers();
+			admin.firestore().collection('data/industry-bot/claims').get().then(async (col2) => {
+				const validClaims = [];
+				for (let index = 0; index < col.docs.length; index++) {
+					const dc = col.docs[index];
+					for (let index2 = 0; index2 < col2.docs.length; index2++) {
+						const dc2 = col2.docs[index2];
+						if (dc.id == dc2.data().member) {
+							// this is a valid claim
+							validClaims.push(dc2);
+						}
+					}
+				}
+				await downloadClaims(validClaims);
+				await deleteCloudClaims(col2);
+				await saveClaims();
+			});
+		});
+		break;
+	case '!update':
+		let members = await database.query('SELECT * FROM members');
+		members = members.rows;
+		const views = [];
+		for (let index = 0; index < members.length; index++) {
+			const member = members[index];
+			const view = await calculateStatus(message, message.guild.members.cache.get(member.member_id), true);
+			if (view) {
+				view.name = member.name;
+				views.push(view);
+			}
+		}
+		const msgs = `\`\`\`JS\n ${JSON.stringify(views, null, 2)} \`\`\``.match(/[\s\S]{1,2000}/g);
+		for (let index = 0; index < msgs.length; index++) {
+			const msg = msgs[index];
+			message.channel.send(msg);
+		}
+		message.channel.send();
+		break;
 	default:
 		break;
+	}
+};
+
+const downloadMembers = async (col) => {
+	for (let index = 0; index < col.docs.length; index++) {
+		const membr = col.docs[index];
+		const dat = membr.data();
+		if (!dat.name) return;
+		await database.query('INSERT INTO members (member_id, name, type, officer) VALUES ($1::numeric, $2::varchar, $3::member_type, $4::boolean) ON CONFLICT (member_id) DO NOTHING', [dat.member_id, dat.name, 'Pup', false]);
+	}
+};
+
+const deleteCloudMembers = async (col) => {
+	for (let index = 0; index < col.docs.length; index++) {
+		const membr = col.docs[index];
+		membr.ref.delete();
+	}
+};
+
+const saveMembers = async () => {
+	let members = await database.query('SELECT * FROM members');
+	members = members.rows;
+	for (let index = 0; index < members.length; index++) {
+		const member = members[index];
+		const id = admin.firestore().collection('data/industry-bot/members').doc().id;
+		admin.firestore().doc(`data/industry-bot/members/${id}`).get().then(doc => {
+			if (doc) {
+				doc.ref.set(member);
+			}
+		});
+	}
+};
+
+const downloadClaims = async (validClaims) => {
+	for (let index = 0; index < validClaims.length; index++) {
+		const membr = validClaims[index];
+		const dat = membr.data();
+		if (dat.id) {
+			await database.query('INSERT INTO claims (id, member_id, type, amount, timestamp, status, name, helpers) values ($1::numeric, $2::numeric, $3::claim_type, $4::numeric, $5::numeric, $6::claim_status, $7::varchar, $8::text[]) ON CONFLICT (id) DO NOTHING', [dat.id, dat.member_id, dat.type, dat.amount, dat.timestamp, dat.status, dat.name, dat.helpers]);
+		} else {
+			let type;
+			switch (dat.type) {
+			case 0:
+				// ore
+				type = 'Ore';
+				break;
+			case 1:
+				// debris
+				type = 'Ore';
+				break;
+			case 2:
+				// module
+				type = 'Ore';
+				break;
+			case 3:
+				// rig
+				type = 'Ore';
+				break;
+			case 4:
+				// isk
+				type = 'Ore';
+				break;
+			case 5:
+				// story
+				type = 'Story';
+				break;
+			default:
+				break;
+			}
+			let status;
+			if (dat.approved) {
+				status = 'Approved';
+			} else if (dat.rejected) {
+				status = 'Rejected';
+			} else {
+				status = 'Pending';
+			}
+			await database.query('INSERT INTO claims (id, member_id, type, amount, timestamp, status, name, helpers) values (nextval(\'claim_id\'), $1::numeric, $2::claim_type, $3::numeric, $4::numeric, $5::claim_status, $6::varchar, $7::text[]) ON CONFLICT (id) DO NOTHING', [dat.member, type, dat.amount, dat.timestamp, status, dat.name, dat.helpers]);
+		}
+	}
+};
+
+const deleteCloudClaims = async (col) => {
+	for (let index = 0; index < col.docs.length; index++) {
+		const membr = col.docs[index];
+		membr.ref.delete();
+	}
+};
+
+const saveClaims = async () => {
+	let claims = await database.query('SELECT * FROM claims');
+	claims = claims.rows;
+	for (let index = 0; index < claims.length; index++) {
+		const claim = claims[index];
+		const id = admin.firestore().collection('data/industry-bot/claims').doc().id;
+		admin.firestore().doc(`data/industry-bot/claims/${id}`).get().then(doc => {
+			if (doc) {
+				doc.ref.set(claim);
+			}
+		});
 	}
 };
 
@@ -293,7 +472,7 @@ const postClaimAdminChannel = async (claim) => {
 	});
 };
 
-const calculateStatus = async (message, guildMember) => {
+const calculateStatus = async (message, guildMember, dashboard) => {
 	if (!guildMember) {return;}
 	let member = await database.query(`SELECT * from members where member_id = ${guildMember.id}`).catch(console.error);
 	if (member.rows.length > 0) {
@@ -418,10 +597,16 @@ const calculateStatus = async (message, guildMember) => {
 		viewer.Corp_Events_Attended = totalParticipationThisMonth;
 		viewer.Corp_Events_Last_Month = totalParticipationLastMonth;
 		// tell us our status
-		message.channel.send(`<@${guildMember.id}>:\n\`\`\`JS\n ${JSON.stringify(viewer, null, 4)} \`\`\``);
+		if (dashboard) {
+			// this is for the dashboard, return the results.
+			return viewer;
+		} else {
+			message.channel.send(`<@${guildMember.id}>:\n\`\`\`JS\n ${JSON.stringify(viewer, null, 4)} \`\`\``);
+		}
 		await database.query(`UPDATE members SET type = '${OurCurrentStatus}' where member_id = ${guildMember.id}`);
 
 	} else {
+		if (dashboard) return;
 		message.channel.send(`There is no entry in the active database for <@${guildMember.id}>.`);
 	}
 };
