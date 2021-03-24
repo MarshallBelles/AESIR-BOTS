@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS config (
     orders_channel text,
     skills_channel text,
     tech_level_channel text,
-    the_woods_channel text
+    the_woods_channel text,
+    payroll_channel text
 );
 
 INSERT INTO config (
@@ -24,7 +25,8 @@ INSERT INTO config (
     orders_channel,
     skills_channel,
     tech_level_channel,
-    the_woods_channel
+    the_woods_channel,
+    payroll_channel
 ) VALUES (
     ARRAY['misaba','clarelam','hub'],
     '791341047820845066',
@@ -34,7 +36,8 @@ INSERT INTO config (
     '800097380162732053',
     '796435112039809044',
     '796131272941502525',
-    '776559380970995712'
+    '776559380970995712',
+    '815242172990619709'
 );
 
 CREATE TABLE IF NOT EXISTS members (

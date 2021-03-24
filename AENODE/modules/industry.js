@@ -148,10 +148,19 @@ const handleIndyCommands = async (message) => {
 				await downloadClaims(validClaims);
 				await deleteCloudClaims(col2);
 				await saveClaims();
+				await alterSequenceClaim_id();
 			});
 		});
 		break;
 	case '!update':
+		let contributingMembers = await database.query('SELECT distinct member_id FROM claims union select distinct unnest(helpers)::numeric as member_id from claims');
+		contributingMembers = contributingMembers.rows;
+		for (let index = 0; index < contributingMembers.length; index++) {
+			// ensure that all contributing members are in the database
+			const cmem = contributingMembers[index];
+			const name = message.guild.members.cache.get(cmem.member_id).displayName;
+			await database.query('INSERT INTO members (member_id, name, type, officer) VALUES ($1::numeric, $2::varchar, $3::member_type, $4::boolean) ON CONFLICT (member_id) DO NOTHING', [cmem.member_id, name, 'Pup', false]);
+		}
 		let members = await database.query('SELECT * FROM members');
 		members = members.rows;
 		const views = [];
@@ -169,6 +178,41 @@ const handleIndyCommands = async (message) => {
 			message.channel.send(msg);
 		}
 		message.channel.send();
+		break;
+	case '!payroll':
+		// all contributing members for the past two months.
+		const date1 = new Date();
+		const DayOneLastMonth = new Date(date1.getFullYear(), date1.getMonth() - 1, 1);
+		let payroll = await database.query('SELECT * FROM members WHERE member_id IN (SELECT distinct member_id FROM claims where timestamp > $1::numeric and status = \'Approved\' union select distinct unnest(helpers)::numeric as member_id from claims where timestamp > $1::numeric and status = \'Approved\')', [DayOneLastMonth.getTime()]);
+		payroll = payroll.rows;
+		let payout = 0;
+		if (parts[1] == 'split') {
+			// we are splitting evenly
+			payout = parts[2];
+			payout = payout / payroll.length;
+			for (let index = 0; index < message.guild.members.cache.length; index++) {
+				const mem1 = message.guild.members.cache[index];
+				mem1.roles.remove('815242305198882846');
+			}
+			mClient.channels.fetch(config.payroll_channel).then((channel1) => {
+				channel1.bulkDelete(100).then(() => {
+					channel1.send(`The delcared payout for this period is: ${numberWithCommas(Math.round(payout))} ISK per person. \nPlease create a contract to Spaded Ace to receive this amount.`);
+					for (let index = 0; index < payroll.length; index++) {
+						const member = payroll[index];
+						const mem2 = message.guild.members.cache.get(member.member_id);
+						mem2.roles.add('815242305198882846');
+						channel1.send(`<@${member.member_id}>`);
+					}
+				}).catch(console.error);
+			}).catch(console.error);
+		} else {
+			// part 1 should be the declared amount
+			payout = parts[1];
+			// TODO
+			//
+			//
+			//
+		}
 		break;
 	default:
 		break;
@@ -203,6 +247,13 @@ const saveMembers = async () => {
 			}
 		});
 	}
+};
+
+const alterSequenceClaim_id = async () => {
+	let max = await database.query('select max(id) from claims');
+	max = max.rows;
+	await database.query(`ALTER SEQUENCE claim_id RESTART WITH ${max[0].max + 1}`);
+	console.log(`altered sequence claim_id to start at: ${max[0].max + 1}`);
 };
 
 const downloadClaims = async (validClaims) => {
@@ -480,13 +531,16 @@ const calculateStatus = async (message, guildMember, dashboard) => {
 
 		// Our calculations are based monthly
 		const date = new Date();
-		const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
 		const firstDayLastMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
 		const lastDayLastMonth = new Date(date.getFullYear(), date.getMonth(), 0);
-		let claims = await database.query(`SELECT * from claims where member_id = ${guildMember.id} and timestamp > ${firstDayOfMonth.getTime()} and status = 'Approved'`);
+		let claims = await database.query(`SELECT * from claims where member_id = ${guildMember.id} and timestamp > ${lastDayLastMonth.getTime()} and status = 'Approved'`);
 		let claimsLastMonth = await database.query(`SELECT * from claims where member_id = ${guildMember.id} and timestamp between ${firstDayLastMonth.getTime()} and ${lastDayLastMonth.getTime()} and status = 'Approved'`);
+		let claimsHelpedOnLastMonth = await database.query(`select * from claims where '${guildMember.id}' = any (helpers) and timestamp between ${firstDayLastMonth.getTime()} and ${lastDayLastMonth.getTime()} and status = 'Approved'`);
+		let claimsHelpedOnThisMonth = await database.query(`select * from claims where '${guildMember.id}' = any (helpers) and timestamp > ${lastDayLastMonth.getTime()} and status = 'Approved'`);
 		claims = claims.rows;
 		claimsLastMonth = claimsLastMonth.rows;
+		claimsHelpedOnLastMonth = claimsHelpedOnLastMonth.rows;
+		claimsHelpedOnThisMonth = claimsHelpedOnThisMonth.rows;
 
 		const packMemberOre = 1500000;
 		const direwolfOre = 2500000;
@@ -498,10 +552,13 @@ const calculateStatus = async (message, guildMember, dashboard) => {
 		let totalOreThisMonth = 0;
 		let totalParticipationThisMonth = 0;
 
-		// TODO
-		// Include helpers arrays into the calculations
-		//
-		//
+		claimsHelpedOnLastMonth.forEach(() => {
+			totalParticipationLastMonth += 1;
+		});
+
+		claimsHelpedOnThisMonth.forEach(() => {
+			totalParticipationThisMonth += 1;
+		});
 
 		claims.forEach(claim => {
 			switch (claim.type) {
@@ -528,7 +585,7 @@ const calculateStatus = async (message, guildMember, dashboard) => {
 		claimsLastMonth.forEach(claim => {
 			switch (claim.type) {
 			case 'Ore':
-				totalOreLastMonth += claim.amount;
+				totalOreLastMonth += Number(claim.amount);
 				break;
 			case 'Story':
 				totalParticipationLastMonth += 1;
@@ -540,7 +597,7 @@ const calculateStatus = async (message, guildMember, dashboard) => {
 				totalParticipationLastMonth += 1;
 				break;
 			case 'PI':
-				totalOreLastMonth += claim.amount;
+				totalOreLastMonth += Number(claim.amount);
 				break;
 			default:
 				break;
@@ -641,4 +698,8 @@ const declineContribution = async (message, user) => {
 	message.channel.send(`<@${user.id}> has rejected claim ${parts[6]}`);
 	message.delete();
 	await database.query('UPDATE claims SET status = \'Rejected\' WHERE id = $1::numeric', [parts[6]]);
+};
+
+const numberWithCommas = (x) => {
+	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
